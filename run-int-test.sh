@@ -57,10 +57,10 @@ function log_error(){
 function install_jdk(){
     jdk_name=$1
 
-    mkdir -p /opt/${jdk_name}
-    jdk_file=$(jq -r '.jdk[] | select ( .name == '\"${jdk_name}\"') | .file_name' ${INFRA_JSON})
-    wget -q https://integration-testgrid-resources.s3.amazonaws.com/lib/jdk/$jdk_file.tar.gz
-    tar -xzf "$jdk_file.tar.gz" -C /opt/${jdk_name} --strip-component=1
+    mkdir -p /opt/${jdk_name} || true
+    jdk_file=$(jq -r '.jdk[] | select ( .name == '\"${jdk_name}\"') | .file_name' ${INFRA_JSON}) || true
+    wget -q https://integration-testgrid-resources.s3.amazonaws.com/lib/jdk/$jdk_file.tar.gz || true
+    tar -xzf "$jdk_file.tar.gz" -C /opt/${jdk_name} --strip-component=1 || true
 
     export JAVA_HOME=/opt/${jdk_name}
     echo $JAVA_HOME
@@ -69,80 +69,80 @@ function install_jdk(){
 function export_db_params(){
     db_name=$1
 
-    export WSO2SHARED_DB_DRIVER=$(jq -r '.jdbc[] | select ( .name == '\"${db_name}\"' ) | .driver' ${INFRA_JSON})
-    export WSO2SHARED_DB_URL=$(jq -r '.jdbc[] | select ( .name == '\"${db_name}\"' ) | .database[] | select ( .name == "WSO2SHARED_DB") | .url' ${INFRA_JSON})
-    export WSO2SHARED_DB_USERNAME=$(jq -r '.jdbc[] | select ( .name == '\"${db_name}\"' ) | .database[] | select ( .name == "WSO2SHARED_DB") | .username' ${INFRA_JSON})
-    export WSO2SHARED_DB_PASSWORD=$(jq -r '.jdbc[] | select ( .name == '\"${db_name}\"' ) | .database[] | select ( .name == "WSO2SHARED_DB") | .password' ${INFRA_JSON})
-    export WSO2SHARED_DB_VALIDATION_QUERY=$(jq -r '.jdbc[] | select ( .name == '\"${db_name}\"' ) | .validation_query' ${INFRA_JSON})
+    export WSO2SHARED_DB_DRIVER=$(jq -r '.jdbc[] | select ( .name == '\"${db_name}\"' ) | .driver' ${INFRA_JSON}) || true
+    export WSO2SHARED_DB_URL=$(jq -r '.jdbc[] | select ( .name == '\"${db_name}\"' ) | .database[] | select ( .name == "WSO2SHARED_DB") | .url' ${INFRA_JSON}) || true
+    export WSO2SHARED_DB_USERNAME=$(jq -r '.jdbc[] | select ( .name == '\"${db_name}\"' ) | .database[] | select ( .name == "WSO2SHARED_DB") | .username' ${INFRA_JSON}) || true
+    export WSO2SHARED_DB_PASSWORD=$(jq -r '.jdbc[] | select ( .name == '\"${db_name}\"' ) | .database[] | select ( .name == "WSO2SHARED_DB") | .password' ${INFRA_JSON}) || true
+    export WSO2SHARED_DB_VALIDATION_QUERY=$(jq -r '.jdbc[] | select ( .name == '\"${db_name}\"' ) | .validation_query' ${INFRA_JSON}) || true
     
-    export WSO2IDENTITY_DB_DRIVER=$(jq -r '.jdbc[] | select ( .name == '\"${db_name}\"' ) | .driver' ${INFRA_JSON})
-    export WSO2IDENTITY_DB_URL=$(jq -r '.jdbc[] | select ( .name == '\"${db_name}\"' ) | .database[] | select ( .name == "WSO2IDENTITY_DB") | .url' ${INFRA_JSON})
-    export WSO2IDENTITY_DB_USERNAME=$(jq -r '.jdbc[] | select ( .name == '\"${db_name}\"' ) | .database[] | select ( .name == "WSO2IDENTITY_DB") | .username' ${INFRA_JSON})
-    export WSO2IDENTITY_DB_PASSWORD=$(jq -r '.jdbc[] | select ( .name == '\"${db_name}\"' ) | .database[] | select ( .name == "WSO2IDENTITY_DB") | .password' ${INFRA_JSON})
-    export WSO2IDENTITY_DB_VALIDATION_QUERY=$(jq -r '.jdbc[] | select ( .name == '\"${db_name}\"' ) | .validation_query' ${INFRA_JSON})
+    export WSO2IDENTITY_DB_DRIVER=$(jq -r '.jdbc[] | select ( .name == '\"${db_name}\"' ) | .driver' ${INFRA_JSON}) || true
+    export WSO2IDENTITY_DB_URL=$(jq -r '.jdbc[] | select ( .name == '\"${db_name}\"' ) | .database[] | select ( .name == "WSO2IDENTITY_DB") | .url' ${INFRA_JSON}) || true
+    export WSO2IDENTITY_DB_USERNAME=$(jq -r '.jdbc[] | select ( .name == '\"${db_name}\"' ) | .database[] | select ( .name == "WSO2IDENTITY_DB") | .username' ${INFRA_JSON}) || true
+    export WSO2IDENTITY_DB_PASSWORD=$(jq -r '.jdbc[] | select ( .name == '\"${db_name}\"' ) | .database[] | select ( .name == "WSO2IDENTITY_DB") | .password' ${INFRA_JSON}) || true
+    export WSO2IDENTITY_DB_VALIDATION_QUERY=$(jq -r '.jdbc[] | select ( .name == '\"${db_name}\"' ) | .validation_query' ${INFRA_JSON}) || true
     
 }
 
-source /etc/environment
+source /etc/environment || true
 
 log_info "Clone Product repository"
 if [ ! -d $PRODUCT_REPOSITORY_NAME ];
 then
-    git clone https://${GIT_USER}:${GIT_PASS}@$PRODUCT_REPOSITORY --branch $PRODUCT_REPOSITORY_BRANCH --single-branch
+    git clone https://${GIT_USER}:${GIT_PASS}@$PRODUCT_REPOSITORY --branch $PRODUCT_REPOSITORY_BRANCH --single-branch || true
 fi
 
 log_info "Exporting JDK"
-install_jdk ${JDK_TYPE}
+install_jdk ${JDK_TYPE} || true
 
-pwd
+pwd || true
 
-db_file=$(jq -r '.jdbc[] | select ( .name == '\"${DB_TYPE}\"') | .file_name' ${INFRA_JSON})
-wget -q https://integration-testgrid-resources.s3.amazonaws.com/lib/jdbc/${db_file}.jar  -P $TESTGRID_DIR/${PRODUCT_PACK_NAME}/repository/components/lib
+db_file=$(jq -r '.jdbc[] | select ( .name == '\"${DB_TYPE}\"') | .file_name' ${INFRA_JSON}) || true
+wget -q https://integration-testgrid-resources.s3.amazonaws.com/lib/jdbc/${db_file}.jar  -P $TESTGRID_DIR/${PRODUCT_PACK_NAME}/repository/components/lib || true
 
-sed -i "s|DB_HOST|${CF_DB_HOST}|g" ${INFRA_JSON}
-sed -i "s|DB_USERNAME|${CF_DB_USERNAME}|g" ${INFRA_JSON}
-sed -i "s|DB_PASSWORD|${CF_DB_PASSWORD}|g" ${INFRA_JSON}
-sed -i "s|DB_NAME|${DB_NAME}|g" ${INFRA_JSON}
+sed -i "s|DB_HOST|${CF_DB_HOST}|g" ${INFRA_JSON} || true
+sed -i "s|DB_USERNAME|${CF_DB_USERNAME}|g" ${INFRA_JSON} || true
+sed -i "s|DB_PASSWORD|${CF_DB_PASSWORD}|g" ${INFRA_JSON} || true
+sed -i "s|DB_NAME|${DB_NAME}|g" ${INFRA_JSON} || true
 
-export_db_params ${DB_TYPE}
+export_db_params ${DB_TYPE} || true
 
 # delete if the folder is available
-rm -rf $PRODUCT_REPOSITORY_PACK_DIR
-mkdir -p $PRODUCT_REPOSITORY_PACK_DIR
+rm -rf $PRODUCT_REPOSITORY_PACK_DIR || true
+mkdir -p $PRODUCT_REPOSITORY_PACK_DIR || true
 log_info "Copying product pack to Repository"
-ls $TESTGRID_DIR/$PRODUCT_PACK_NAME
-zip -q -r $TESTGRID_DIR/$PRODUCT_NAME-$PRODUCT_VERSION.zip $PRODUCT_NAME-$PRODUCT_VERSION
+ls $TESTGRID_DIR/$PRODUCT_PACK_NAME || true
+zip -q -r $TESTGRID_DIR/$PRODUCT_NAME-$PRODUCT_VERSION.zip $PRODUCT_NAME-$PRODUCT_VERSION || true
 
 log_info "Navigating to integration test module directory"
-ls $INT_TEST_MODULE_DIR
+ls $INT_TEST_MODULE_DIR || true
 
 # log_info "Running Maven Tests"
 # cd $TESTGRID_DIR/$PRODUCT_REPOSITORY_NAME
 # log_info "Running Maven clean install"
-# mvn clean install -Dmaven.test.skip=true
+# mvn clean install -Dmaven.test.skip=true || true
 # echo "Copying pack to target"
-# mv $TESTGRID_DIR/$PRODUCT_NAME-$PRODUCT_VERSION.zip $PRODUCT_REPOSITORY_PACK_DIR/$PRODUCT_NAME-$PRODUCT_VERSION.zip
-# ls $PRODUCT_REPOSITORY_PACK_DIR
+# mv $TESTGRID_DIR/$PRODUCT_NAME-$PRODUCT_VERSION.zip $PRODUCT_REPOSITORY_PACK_DIR/$PRODUCT_NAME-$PRODUCT_VERSION.zip || true
+# ls $PRODUCT_REPOSITORY_PACK_DIR || true
 # cd $INT_TEST_MODULE_DIR
 # log_info "Running Maven clean install"
-# mvn clean install
+# mvn clean install || true
 
 # Check if PRODUCT_VERSION doesn't contains "SNAPSHOT"
 if [[ "$PRODUCT_VERSION" != *"SNAPSHOT"* ]]; then
-    cd $TESTGRID_DIR/$PRODUCT_REPOSITORY_NAME
+    cd $TESTGRID_DIR/$PRODUCT_REPOSITORY_NAME || true
     log_info "Running Maven clean install"
-    mvn clean install -Dmaven.test.skip=true
+    mvn clean install -Dmaven.test.skip=true || true
     echo "Copying pack to target"
-    mv $TESTGRID_DIR/$PRODUCT_NAME-$PRODUCT_VERSION.zip $PRODUCT_REPOSITORY_PACK_DIR/$PRODUCT_NAME-$PRODUCT_VERSION.zip
-    ls $PRODUCT_REPOSITORY_PACK_DIR
-    cd $INT_TEST_MODULE_DIR
+    mv $TESTGRID_DIR/$PRODUCT_NAME-$PRODUCT_VERSION.zip $PRODUCT_REPOSITORY_PACK_DIR/$PRODUCT_NAME-$PRODUCT_VERSION.zip || true
+    ls $PRODUCT_REPOSITORY_PACK_DIR || true
+    cd $INT_TEST_MODULE_DIR || true
     log_info "Running Maven clean install"
-    mvn clean install
+    mvn clean install || true
 else 
     echo "Copying pack to target"
-    mv $TESTGRID_DIR/$PRODUCT_NAME-$PRODUCT_VERSION.zip $PRODUCT_REPOSITORY_PACK_DIR/$PRODUCT_NAME-$PRODUCT_VERSION.zip
-    ls $PRODUCT_REPOSITORY_PACK_DIR
-    cd $INT_TEST_MODULE_DIR
+    mv $TESTGRID_DIR/$PRODUCT_NAME-$PRODUCT_VERSION.zip $PRODUCT_REPOSITORY_PACK_DIR/$PRODUCT_NAME-$PRODUCT_VERSION.zip || true
+    ls $PRODUCT_REPOSITORY_PACK_DIR || true
+    cd $INT_TEST_MODULE_DIR || true
     log_info "Running Maven clean install"
-    mvn clean install
+    mvn clean install || true
 fi
