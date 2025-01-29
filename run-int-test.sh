@@ -147,8 +147,3 @@ else
     log_info "Running Maven clean install"
     mvn clean install
 fi
-
-
-
-
- 
