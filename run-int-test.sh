@@ -58,13 +58,34 @@ function log_error(){
 function install_jdk(){
     jdk_name=$1
 
-    mkdir -p /opt/${jdk_name}
-    jdk_file=$(jq -r '.jdk[] | select ( .name == '\"${jdk_name}\"') | .file_name' ${INFRA_JSON})
-    wget -q https://integration-testgrid-resources.s3.amazonaws.com/lib/jdk/$jdk_file.tar.gz
-    tar -xzf "$jdk_file.tar.gz" -C /opt/${jdk_name} --strip-component=1
+    if [[ "$jdk_name" == "ADOPT_OPEN_JDK17" ||  "$jdk_name" == "ADOPT_OPEN_JDK21" ]]; then
 
-    export JAVA_HOME=/opt/${jdk_name}
-    echo $JAVA_HOME
+        mkdir -p /opt/${jdk_name}
+        jdk_file=$(jq -r '.jdk[] | select ( .name == '\"${jdk_name}\"') | .file_name' ${INFRA_JSON})
+        wget -q https://integration-testgrid-resources.s3.amazonaws.com/lib/jdk/$jdk_file.tar.gz
+        tar -xzf "$jdk_file.tar.gz" -C /opt/${jdk_name} --strip-component=1
+
+        export JAVA_HOME=/opt/${jdk_name}
+        echo $JAVA_HOME
+        
+        jdk11="ADOPT_OPEN_JDK11"
+        mkdir -p /opt/${jdk11}
+        jdk_file2=$(jq -r '.jdk[] | select ( .name == '\"${jdk11}\"') | .file_name' ${INFRA_JSON})
+        wget -q https://integration-testgrid-resources.s3.amazonaws.com/lib/jdk/$jdk_file.tar.gz
+        tar -xzf "$jdk_file2.tar.gz" -C /opt/${jdk11} --strip-component=1
+
+        export JAVA_HOME=/opt/${jdk11}
+        echo $JAVA_HOME
+    else
+
+        mkdir -p /opt/${jdk_name}
+        jdk_file=$(jq -r '.jdk[] | select ( .name == '\"${jdk_name}\"') | .file_name' ${INFRA_JSON})
+        wget -q https://integration-testgrid-resources.s3.amazonaws.com/lib/jdk/$jdk_file.tar.gz
+        tar -xzf "$jdk_file.tar.gz" -C /opt/${jdk_name} --strip-component=1
+
+        export JAVA_HOME=/opt/${jdk_name}
+        echo $JAVA_HOME
+    fi
 }
 
 function export_db_params(){
@@ -133,12 +154,15 @@ if [[ "$PRODUCT_VERSION" != *"SNAPSHOT"* ]]; then
     cd $TESTGRID_DIR/$PRODUCT_REPOSITORY_NAME
     log_info "Running Maven clean install"
     export MAVEN_OPTS="--add-opens java.base/java.net=ALL-UNNAMED --add-opens java.base/java.lang.reflect=ALL-UNNAMED"
+    echo $JAVA_HOME
     mvn clean install -Dmaven.test.skip=true
     echo "Copying pack to target"
     mv $TESTGRID_DIR/$PRODUCT_NAME-$PRODUCT_VERSION.zip $PRODUCT_REPOSITORY_PACK_DIR/$PRODUCT_NAME-$PRODUCT_VERSION.zip
     ls $PRODUCT_REPOSITORY_PACK_DIR
     cd $INT_TEST_MODULE_DIR
     log_info "Running Maven clean install"
+    export JAVA_HOME=/opt/${jdk_name}
+    echo $JAVA_HOME
     mvn clean install
 else 
     echo "Copying pack to target"
