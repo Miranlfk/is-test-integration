@@ -71,7 +71,7 @@ function install_jdk(){
         jdk11="ADOPT_OPEN_JDK11"
         mkdir -p /opt/${jdk11}
         jdk_file2=$(jq -r '.jdk[] | select ( .name == '\"${jdk11}\"') | .file_name' ${INFRA_JSON})
-        wget -q https://integration-testgrid-resources.s3.amazonaws.com/lib/jdk/$jdk_file.tar.gz
+        wget -q https://integration-testgrid-resources.s3.amazonaws.com/lib/jdk/$jdk11.tar.gz
         tar -xzf "$jdk_file2.tar.gz" -C /opt/${jdk11} --strip-component=1
 
         export JAVA_HOME=/opt/${jdk11}
