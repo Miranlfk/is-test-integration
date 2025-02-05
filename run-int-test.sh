@@ -130,10 +130,10 @@ ls $INT_TEST_MODULE_DIR
 
 # Check if PRODUCT_VERSION doesn't contains "SNAPSHOT"
 if [[ "$PRODUCT_VERSION" != *"SNAPSHOT"* ]]; then
-    cd $TESTGRID_DIR/$PRODUCT_REPOSITORY_NAME
-    log_info "Running Maven clean install"
-    export MAVEN_OPTS="--add-opens java.base/java.net=ALL-UNNAMED"
-    mvn clean install -Dmaven.test.skip=true
+    # cd $TESTGRID_DIR/$PRODUCT_REPOSITORY_NAME
+    # log_info "Running Maven clean install"
+    # export MAVEN_OPTS="--add-opens java.base/java.net=ALL-UNNAMED"
+    # mvn clean install -Dmaven.test.skip=true
     echo "Copying pack to target"
     mv $TESTGRID_DIR/$PRODUCT_NAME-$PRODUCT_VERSION.zip $PRODUCT_REPOSITORY_PACK_DIR/$PRODUCT_NAME-$PRODUCT_VERSION.zip
     ls $PRODUCT_REPOSITORY_PACK_DIR
