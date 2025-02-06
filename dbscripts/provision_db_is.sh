@@ -125,7 +125,7 @@ elif [[ $DB_ENGINE =~ 'sqlserver-se' ]]; then
     # DB Engine : SQLServer
     echo "SQL Server DB Engine Selected! Running WSO2-IS $WSO2_PRODUCT_VERSION DB Scripts for SQL Server..."
     sqlcmd -S CF_DB_HOST -U CF_DB_USERNAME -P CF_DB_PASSWORD -i /home/ubuntu/is/$WSO2_PRODUCT_VERSION_SHORT/is_mssql.sql
-elif [[ $DB_ENGINE = "db2" ]]; then
+elif [[ $DB_ENGINE = "db2-se" ]]; then
     # DB Engine : DB2
     echo "DB2 DB Engine Selected! Running WSO2-IS $WSO2_PRODUCT_VERSION DB Scripts for DB2..."
     db2 -tvf /home/ubuntu/is/$WSO2_PRODUCT_VERSION_SHORT/is_db2.sql -u CF_DB_USERNAME -p CF_DB_PASSWORD -h CF_DB_HOST -p CF_DB_PORT

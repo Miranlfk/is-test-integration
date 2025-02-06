@@ -89,7 +89,7 @@ elif [ $DB_ENGINE = "oracle-se" ]; then
     echo "" >> "${output_files[$i]}"
   done
 
-elif [ $DB_ENGINE = "db2" ]; then
+elif [ $DB_ENGINE = "db2-se" ]; then
   sql_files=("$SCRIPT_LOCATION/db2.sql" "$SCRIPT_LOCATION/identity/db2.sql" "$SCRIPT_LOCATION/consent/db2.sql")
   databases=("WSO2IS_SHARED_DB" "WSO2IS_IDENTITY_DB" "WSO2IS_CONSENT_DB")
   output_file="is710/is_db2.sql"
