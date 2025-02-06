@@ -88,6 +88,22 @@ elif [ $DB_ENGINE = "oracle-se" ]; then
     cat "${sql_files[$i]}" >> "${output_files[$i]}"
     echo "" >> "${output_files[$i]}"
   done
+
+elif [ $DB_ENGINE = "db2" ]; then
+  sql_files=("$SCRIPT_LOCATION/db2.sql" "$SCRIPT_LOCATION/identity/db2.sql" "$SCRIPT_LOCATION/consent/db2.sql")
+  databases=("WSO2IS_SHARED_DB" "WSO2IS_IDENTITY_DB" "WSO2IS_CONSENT_DB")
+  output_file="is710/is_db2.sql"
+  
+  # Ensure the output file exists (it will not be overwritten)
+  touch "$output_file"
+  
+  # Loop through files and append content
+  for i in "${!sql_files[@]}"; do
+  echo "CONNECT TO ${databases[$i]};" >> "$output_file"
+  echo "" >> "$output_file"
+  cat "${sql_files[$i]}" >> "$output_file"
+  echo "" >> "$output_file"
+  done
 fi
 
 echo "SQL files appended successfully"

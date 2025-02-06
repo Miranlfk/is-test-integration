@@ -1,4 +1,5 @@
 #!/bin/bash
+
 #Running Database scripts for WSO2-IS
 echo "Running DB scripts for WSO2-IS..."
 
@@ -51,13 +52,9 @@ elif [ $WSO2_PRODUCT_VERSION = "7.0.0" ]; then
 elif [ $WSO2_PRODUCT_VERSION = "7.1.0-SNAPSHOT" ]; then
     WSO2_PRODUCT_VERSION_SHORT=is710
     USE_CONSENT_DB=true
-elif [ $WSO2_PRODUCT_VERSION = "7.1.0-m6-SNAPSHOT" ]; then
-    WSO2_PRODUCT_VERSION_SHORT=is710
-    USE_CONSENT_DB=true
 fi
 
 #Run database scripts for given database engine and product version
-
 
 if [[ $DB_ENGINE = "postgres" ]]; then
     # DB Engine : Postgres
@@ -110,10 +107,10 @@ elif [[ $DB_ENGINE =~ 'oracle-se' ]]; then
     echo "--------------------IDENTITY---------------------"
     echo exit | sqlplus64 WSO2IS_IDENTITY_DB/CF_DB_PASSWORD@//CF_DB_HOST:CF_DB_PORT/WSO2ISDB @/home/ubuntu/is/$WSO2_PRODUCT_VERSION_SHORT/is_oracle_identity.sql
     if [[ $WSO2_PRODUCT_VERSION = "5.10.0" || $WSO2_PRODUCT_VERSION = "5.11.0" || $WSO2_PRODUCT_VERSION = "7.0.0" ]]; then
-	echo "--------------------COMMON---------------------"
+    echo "--------------------COMMON---------------------"
         echo exit | sqlplus64 WSO2IS_SHARED_DB/CF_DB_PASSWORD@//CF_DB_HOST:CF_DB_PORT/WSO2ISDB @/home/ubuntu/is/$WSO2_PRODUCT_VERSION_SHORT/is_oracle_common.sql
     elif [[ $WSO2_PRODUCT_VERSION = "5.9.0" ]]; then
-	echo "--------------------COMMON---------------------"
+    echo "--------------------COMMON---------------------"
         echo exit | sqlplus64 WSO2IS_SHARED_DB/CF_DB_PASSWORD@//CF_DB_HOST:CF_DB_PORT/WSO2ISDB @/home/ubuntu/is/$WSO2_PRODUCT_VERSION_SHORT/is_oracle_common.sql
     else
         echo exit | sqlplus64 WSO2IS_REG_DB/CF_DB_PASSWORD@//CF_DB_HOST:CF_DB_PORT/WSO2ISDB @/home/ubuntu/is/$WSO2_PRODUCT_VERSION_SHORT/is_oracle_common.sql
@@ -128,6 +125,10 @@ elif [[ $DB_ENGINE =~ 'sqlserver-se' ]]; then
     # DB Engine : SQLServer
     echo "SQL Server DB Engine Selected! Running WSO2-IS $WSO2_PRODUCT_VERSION DB Scripts for SQL Server..."
     sqlcmd -S CF_DB_HOST -U CF_DB_USERNAME -P CF_DB_PASSWORD -i /home/ubuntu/is/$WSO2_PRODUCT_VERSION_SHORT/is_mssql.sql
+elif [[ $DB_ENGINE = "db2" ]]; then
+    # DB Engine : DB2
+    echo "DB2 DB Engine Selected! Running WSO2-IS $WSO2_PRODUCT_VERSION DB Scripts for DB2..."
+    db2 -tvf /home/ubuntu/is/$WSO2_PRODUCT_VERSION_SHORT/is_db2.sql -u CF_DB_USERNAME -p CF_DB_PASSWORD -h CF_DB_HOST -p CF_DB_PORT
 fi
 
 echo "Database Provision Complete"
