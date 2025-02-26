@@ -108,11 +108,6 @@ function export_db_params(){
 source /etc/environment
 
 log_info "Clone Product repository"
-if [ -f /etc/redhat-release ] && grep -q "release 9" /etc/redhat-release; then
-    if ! command -v git &> /dev/null; then
-        sudo dnf install -y git
-    fi
-fi
 if [ ! -d $PRODUCT_REPOSITORY_NAME ];
 then
     git clone https://${GIT_USER}:${GIT_PASS}@$PRODUCT_REPOSITORY --branch $PRODUCT_REPOSITORY_BRANCH --single-branch
