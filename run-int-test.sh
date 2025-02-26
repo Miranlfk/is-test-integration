@@ -108,6 +108,11 @@ function export_db_params(){
 source /etc/environment
 
 log_info "Clone Product repository"
+if [ -f /etc/redhat-release ] && grep -q "release 9" /etc/redhat-release; then
+    if ! command -v git &> /dev/null; then
+        sudo dnf install -y git
+    fi
+fi
 if [ ! -d $PRODUCT_REPOSITORY_NAME ];
 then
     git clone https://${GIT_USER}:${GIT_PASS}@$PRODUCT_REPOSITORY --branch $PRODUCT_REPOSITORY_BRANCH --single-branch
@@ -138,18 +143,6 @@ zip -q -r $TESTGRID_DIR/$PRODUCT_NAME-$PRODUCT_VERSION.zip $PRODUCT_NAME-$PRODUC
 log_info "Navigating to integration test module directory"
 ls $INT_TEST_MODULE_DIR
 
-# log_info "Running Maven Tests"
-# cd $TESTGRID_DIR/$PRODUCT_REPOSITORY_NAME
-# log_info "Running Maven clean install"
-# mvn clean install -Dmaven.test.skip=true
-# echo "Copying pack to target"
-# mv $TESTGRID_DIR/$PRODUCT_NAME-$PRODUCT_VERSION.zip $PRODUCT_REPOSITORY_PACK_DIR/$PRODUCT_NAME-$PRODUCT_VERSION.zip
-# ls $PRODUCT_REPOSITORY_PACK_DIR
-# cd $INT_TEST_MODULE_DIR
-# log_info "Running Maven clean install"
-# mvn clean install
-
-# Check if PRODUCT_VERSION doesn't contains "SNAPSHOT"
 if [[ "$PRODUCT_VERSION" != *"SNAPSHOT"* ]]; then
     cd $TESTGRID_DIR/$PRODUCT_REPOSITORY_NAME
     log_info "Running Maven clean install"
