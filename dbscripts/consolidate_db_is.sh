@@ -5,11 +5,12 @@ echo "Creating DB scripts for WSO2-IS based on DB Engine"
 # Define files and databases
 DB_ENGINE='CF_DBMS_NAME'
 SCRIPT_LOCATION='CF_SCRIPT_LOCATION'
+WSO2_PRODUCT_VERSION_SHORT='CF_PRODUCT_VERSION_SHORT'
 
 if [ $DB_ENGINE = "postgres" ]; then
   sql_files=("$SCRIPT_LOCATION/postgresql.sql" "$SCRIPT_LOCATION/identity/postgresql.sql" "$SCRIPT_LOCATION/consent/postgresql.sql")
   databases=("WSO2IS_SHARED_DB" "WSO2IS_IDENTITY_DB" "WSO2IS_CONSENT_DB")
-  output_file="is710/is_postgres.sql"
+  output_file="$WSO2_PRODUCT_VERSION_SHORT/is_postgres.sql"
   # Ensure the output file exists (it will not be overwritten)
   touch "$output_file"
   
@@ -24,7 +25,7 @@ if [ $DB_ENGINE = "postgres" ]; then
 elif [ $DB_ENGINE = "mysql" ]; then
   sql_files=("$SCRIPT_LOCATION/mysql.sql" "$SCRIPT_LOCATION/identity/mysql.sql" "$SCRIPT_LOCATION/consent/mysql.sql")
   databases=("WSO2IS_SHARED_DB" "WSO2IS_IDENTITY_DB" "WSO2IS_CONSENT_DB")
-  output_files=("is710/is_mysql.sql" "is710/is_mysql5.7.sql" "is710/is_mysql_8.sql")
+  output_files=("$WSO2_PRODUCT_VERSION_SHORT/is_mysql.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_mysql5.7.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_mysql_8.sql")
   
   # Ensure the output files exist (they will not be overwritten)
   for output_file in "${output_files[@]}"; do
@@ -44,7 +45,7 @@ elif [ $DB_ENGINE = "mysql" ]; then
 elif [ $DB_ENGINE = "mariadb" ]; then
   sql_files=("$SCRIPT_LOCATION/mysql.sql" "$SCRIPT_LOCATION/identity/mysql.sql" "$SCRIPT_LOCATION/consent/mysql.sql")
   databases=("WSO2IS_SHARED_DB" "WSO2IS_IDENTITY_DB" "WSO2IS_CONSENT_DB")
-  output_files="is710/is_mysql.sql"
+  output_files="$WSO2_PRODUCT_VERSION_SHORT/is_mysql.sql"
   
   # Ensure the output file exists (it will not be overwritten)
   touch "$output_file"
@@ -60,7 +61,7 @@ elif [ $DB_ENGINE = "mariadb" ]; then
 elif [ $DB_ENGINE = "sqlserver-se" ]; then
   sql_files=("$SCRIPT_LOCATION/mssql.sql" "$SCRIPT_LOCATION/identity/mssql.sql" "$SCRIPT_LOCATION/consent/mssql.sql")
   databases=("WSO2IS_SHARED_DB" "WSO2IS_IDENTITY_DB" "WSO2IS_CONSENT_DB")
-  output_file="is710/is_mssql.sql"
+  output_file="$WSO2_PRODUCT_VERSION_SHORT/is_mssql.sql"
   
   # Ensure the output file exists (it will not be overwritten)
   touch "$output_file"
@@ -77,7 +78,7 @@ elif [ $DB_ENGINE = "sqlserver-se" ]; then
 elif [ $DB_ENGINE = "oracle-se" ]; then
   sql_files=("$SCRIPT_LOCATION/oracle.sql" "$SCRIPT_LOCATION/identity/oracle.sql" "$SCRIPT_LOCATION/consent/oracle.sql")
   databases=("WSO2IS_SHARED_DB" "WSO2IS_IDENTITY_DB" "WSO2IS_CONSENT_DB")
-  output_files=("is710/is_oracle_common.sql" "is710/is_oracle_identity.sql" "is710/is_oracle_consent.sql")
+  output_files=("$WSO2_PRODUCT_VERSION_SHORT/is_oracle_common.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_oracle_identity.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_oracle_consent.sql")
   
   # Ensure the output files exist (they will not be overwritten)
   for output_file in "${output_files[@]}"; do
@@ -92,7 +93,7 @@ elif [ $DB_ENGINE = "oracle-se" ]; then
 elif [ $DB_ENGINE = "db2-se" ]; then
   sql_files=("$SCRIPT_LOCATION/db2.sql" "$SCRIPT_LOCATION/identity/db2.sql" "$SCRIPT_LOCATION/consent/db2.sql")
   databases=("WSO2IS_SHARED_DB" "WSO2IS_IDENTITY_DB" "WSO2IS_CONSENT_DB")
-  output_file="is710/is_db2.sql"
+  output_file="$WSO2_PRODUCT_VERSION_SHORT/is_db2.sql"
   
   # Ensure the output file exists (it will not be overwritten)
   touch "$output_file"
