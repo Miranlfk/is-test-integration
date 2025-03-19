@@ -18,7 +18,7 @@
 #
 # --------------------------------------------------------------------------------------
 
-set -o xtrace; set -e
+set -o xtrace
 
 TESTGRID_DIR=/opt/testgrid/workspace
 INFRA_JSON='infra.json'
