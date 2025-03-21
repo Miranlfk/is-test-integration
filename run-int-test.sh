@@ -146,8 +146,8 @@ if [[ "$PRODUCT_VERSION" != *"SNAPSHOT"* ]]; then
     echo $JAVA_HOME
     if [[ "$PRODUCT_REPOSITORY_BRANCH" == *"support"* ]]; then
         log_info "Add WSO2 repository to pom.xml"
-        cp $TESTGRID_DIR/$PRODUCT_REPOSITORY_NAME/add-patch-repository.sh $TESTGRID_DIR/$PRODUCT_REPOSITORY_NAME/
-        cp $TESTGRID_DIR/$PRODUCT_REPOSITORY_NAME/add_u2.xml $TESTGRID_DIR/$PRODUCT_REPOSITORY_NAME/
+        cp $TESTGRID_DIR/add-patch-repository.sh $TESTGRID_DIR/$PRODUCT_REPOSITORY_NAME/
+        cp $TESTGRID_DIR/add_u2.xml $TESTGRID_DIR/$PRODUCT_REPOSITORY_NAME/
         chmod +x $TESTGRID_DIR/$PRODUCT_REPOSITORY_NAME/add-patch-repository.sh
         bash $TESTGRID_DIR/$PRODUCT_REPOSITORY_NAME/add-patch-repository.sh
     fi
