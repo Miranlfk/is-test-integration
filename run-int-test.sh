@@ -135,7 +135,9 @@ export_db_params ${DB_TYPE}
 rm -rf $PRODUCT_REPOSITORY_PACK_DIR
 mkdir -p $PRODUCT_REPOSITORY_PACK_DIR
 log_info "Copying product pack to Repository"
-ls $TESTGRID_DIR/$PRODUCT_PACK_NAME
+ls $TESTGRID_DIR
+rm -rf $TESTGRID_DIR/$PRODUCT_NAME-$PRODUCT_VERSION.zip
+ls $TESTGRID_DIR
 zip -q -r $TESTGRID_DIR/$PRODUCT_NAME-$PRODUCT_VERSION.zip $PRODUCT_NAME-$PRODUCT_VERSION
 
 log_info "Navigating to integration test module directory"
