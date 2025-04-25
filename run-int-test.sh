@@ -58,60 +58,41 @@ function log_error(){
     exit 1
 }
 
-# Download and install a specific JDK version
-# Arguments:
-#   $1 - JDK name (e.g., ADOPT_OPEN_JDK11, ADOPT_OPEN_JDK17, ADOPT_OPEN_JDK21)
-# Returns:
-#   None, but sets JAVA_HOME environment variable
-function install_specific_jdk() {
-    local jdk_name=$1
-    local jdk_dir="/opt/${jdk_name}"
-    
-    log_info "Installing JDK: ${jdk_name}"
-    
-    # Create JDK directory
-    mkdir -p "${jdk_dir}"
-    
-    # Get JDK file name from infra.json
-    local jdk_file=$(jq -r '.jdk[] | select ( .name == '\"${jdk_name}\"') | .file_name' ${INFRA_JSON})
-    if [[ -z "${jdk_file}" ]]; then
-        log_error "Failed to find JDK file for ${jdk_name} in ${INFRA_JSON}"
-    fi
-    
-    # Download and extract JDK
-    log_info "Downloading JDK: ${jdk_name} (${jdk_file})"
-    wget -q "https://integration-testgrid-resources.s3.amazonaws.com/lib/jdk/${jdk_file}.tar.gz" || log_error "Failed to download JDK ${jdk_name}"
-    tar -xzf "${jdk_file}.tar.gz" -C "${jdk_dir}" --strip-component=1 || log_error "Failed to extract JDK ${jdk_name}"
-    
-    # Clean up downloaded archive
-    rm -f "${jdk_file}.tar.gz"
-    
-    # Set JAVA_HOME
-    export JAVA_HOME="${jdk_dir}"
-    log_info "Set JAVA_HOME to ${JAVA_HOME}"
+function install_jdk11(){
+    jdk11="ADOPT_OPEN_JDK11"
+    mkdir -p /opt/${jdk11}
+    jdk_file2=$(jq -r '.jdk[] | select ( .name == '\"${jdk11}\"') | .file_name' ${INFRA_JSON})
+    wget -q https://integration-testgrid-resources.s3.amazonaws.com/lib/jdk/$jdk_file2.tar.gz
+    tar -xzf "$jdk_file2.tar.gz" -C /opt/${jdk11} --strip-component=1
+
+    export JAVA_HOME=/opt/${jdk11}
 }
 
-# Install JDK for the current build
-# Arguments:
-#   $1 - Primary JDK type to install (from CFN_PROP_FILE)
-# Returns:
-#   None, but sets JAVA_HOME environment variable
-function install_jdk() {
-    local jdk_type=$1
-    local jdk11="ADOPT_OPEN_JDK11"
-    
-    # Install requested JDK version
-    if [[ "${jdk_type}" == "ADOPT_OPEN_JDK17" || "${jdk_type}" == "ADOPT_OPEN_JDK21" ]]; then
-        # For JDK 17 and 21, we need both the requested JDK and JDK 11 for compilation
-        install_specific_jdk "${jdk_type}"
-        
-        # Install JDK 11 for compilation support, this will be reverted once the compilation is done and before testing begins
-        log_info "Installing JDK 11 for compilation support"
-        install_specific_jdk ${jdk11}
-        
+function install_jdks(){
+    mkdir -p /opt/${jdk_name}
+    jdk_file=$(jq -r '.jdk[] | select ( .name == '\"${jdk_name}\"') | .file_name' ${INFRA_JSON})
+    wget -q https://integration-testgrid-resources.s3.amazonaws.com/lib/jdk/$jdk_file.tar.gz
+    tar -xzf "$jdk_file.tar.gz" -C /opt/${jdk_name} --strip-component=1
+
+    export JAVA_HOME=/opt/${jdk_name}
+    echo $JAVA_HOME
+}
+
+function set_jdk(){
+    jdk_name=$1
+    #When running Integration tests for JDK 17 or 21, JDK 11 is also required for compilation.
+    if [[ "$jdk_name" == "ADOPT_OPEN_JDK17" ]] || [[ "$jdk_name" == "ADOPT_OPEN_JDK21" ]]; then
+        echo "Installing " + $jdk_name
+        install_jdks
+        echo $JAVA_HOME
+        #setting JAVA_HOME to JDK 11 to compile
+        install_jdk11
+        echo $JAVA_HOME 
     else
-        # For other JDK types, just install JDK 11
-        install_specific_jdk "${jdk_type}"
+        echo "Installing " + $jdk_name
+        install_jdks
+        echo $JAVA_HOME
+        
     fi
 }
 
@@ -141,7 +122,7 @@ then
 fi
 
 log_info "Exporting JDK"
-install_jdk "${jdk_type}"
+set_jdk ${JDK_TYPE}
 
 pwd
 
@@ -171,7 +152,7 @@ ls $INT_TEST_MODULE_DIR
 if [[ "$PRODUCT_VERSION" != *"SNAPSHOT"* ]]; then
     cd $TESTGRID_DIR/$PRODUCT_REPOSITORY_NAME
     echo $JAVA_HOME
-    #If support is true add the nexus repository to the pom.xml
+    #If support add the nexus repository to the pom.xml
     if [[ "$PRODUCT_REPOSITORY_BRANCH" == *"support"* ]]; then
         log_info "Add WSO2 repository to pom.xml"
         cp $TESTGRID_DIR/add-patch-repository.sh $TESTGRID_DIR/$PRODUCT_REPOSITORY_NAME/
@@ -187,7 +168,6 @@ if [[ "$PRODUCT_VERSION" != *"SNAPSHOT"* ]]; then
     ls $PRODUCT_REPOSITORY_PACK_DIR
     cd $INT_TEST_MODULE_DIR
     log_info "Running Maven clean install"
-    #For Tag based execution we need to reset the JAVA_HOME to the requested JDK for the integration tests once compilation is complete
     export JAVA_HOME=/opt/${jdk_name}
     echo $JAVA_HOME
     mvn clean install
