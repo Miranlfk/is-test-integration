@@ -103,7 +103,7 @@ function install_jdk() {
     # Install requested JDK version
     if [[ "${jdk_type}" == "ADOPT_OPEN_JDK17" || "${jdk_type}" == "ADOPT_OPEN_JDK21" ]]; then
         # For JDK 17 and 21, we need both the requested JDK and JDK 11 for compilation
-        install_specific_jdk ${jdk_type}
+        install_specific_jdk "${jdk_type}"
         
         # Install JDK 11 for compilation support, this will be reverted once the compilation is done and before testing begins
         log_info "Installing JDK 11 for compilation support"
@@ -111,7 +111,7 @@ function install_jdk() {
         
     else
         # For other JDK types, just install JDK 11
-        install_specific_jdk ${jdk_type}
+        install_specific_jdk "${jdk_type}"
     fi
 }
 
@@ -141,7 +141,7 @@ then
 fi
 
 log_info "Exporting JDK"
-install_jdk ${JDK_TYPE}
+install_jdk "${jdk_type}"
 
 pwd
 
