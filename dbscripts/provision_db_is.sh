@@ -149,7 +149,7 @@ elif [[ $DB_ENGINE =~ 'sqlserver-se' ]]; then
 elif [[ $DB_ENGINE = "db2-se" ]]; then
     # DB Engine : DB2
     echo "DB2 DB Engine Selected! Running WSO2-IS $WSO2_PRODUCT_VERSION DB Scripts for DB2..."
-    db2 -tvf /home/ubuntu/is/$WSO2_PRODUCT_VERSION_SHORT/is_db2.sql -u CF_DB_USERNAME -p CF_DB_PASSWORD -h CF_DB_HOST -p CF_DB_PORT
+    db2cli -tvf /home/ubuntu/is/$WSO2_PRODUCT_VERSION_SHORT/is_db2.sql -u CF_DB_USERNAME -p CF_DB_PASSWORD -h CF_DB_HOST -p CF_DB_PORT
 fi
 
 echo "Database Provision Complete"
