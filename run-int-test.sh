@@ -101,14 +101,14 @@ function export_db_params(){
 
     export WSO2SHARED_DB_DRIVER=$(jq -r '.jdbc[] | select ( .name == '\"${db_name}\"' ) | .driver' ${INFRA_JSON})
     export WSO2SHARED_DB_URL=$(jq -r '.jdbc[] | select ( .name == '\"${db_name}\"' ) | .database[] | select ( .name == "WSO2SHARED_DB") | .url' ${INFRA_JSON})
-    export WSO2SHARED_DB_USERNAME=$(jq -r '.jdbc[] | select ( .name == '\"${db_name}\"' ) | .database[] | select ( .name == "WSO2SHARED_DB") | .username' ${INFRA_JSON})
-    export WSO2SHARED_DB_PASSWORD=$(jq -r '.jdbc[] | select ( .name == '\"${db_name}\"' ) | .database[] | select ( .name == "WSO2SHARED_DB") | .password' ${INFRA_JSON})
+    export WSO2SHARED_DB_USERNAME=$(jq -r '.jdbc[] | select ( .name == '\"${db_name}\"' ) | .database[] | select ( .name == "DB_USERNAME") | .username' ${INFRA_JSON})
+    export WSO2SHARED_DB_PASSWORD=$(jq -r '.jdbc[] | select ( .name == '\"${db_name}\"' ) | .database[] | select ( .name == "DB_PASSWORD") | .password' ${INFRA_JSON})
     export WSO2SHARED_DB_VALIDATION_QUERY=$(jq -r '.jdbc[] | select ( .name == '\"${db_name}\"' ) | .validation_query' ${INFRA_JSON})
     
     export WSO2IDENTITY_DB_DRIVER=$(jq -r '.jdbc[] | select ( .name == '\"${db_name}\"' ) | .driver' ${INFRA_JSON})
     export WSO2IDENTITY_DB_URL=$(jq -r '.jdbc[] | select ( .name == '\"${db_name}\"' ) | .database[] | select ( .name == "WSO2IDENTITY_DB") | .url' ${INFRA_JSON})
-    export WSO2IDENTITY_DB_USERNAME=$(jq -r '.jdbc[] | select ( .name == '\"${db_name}\"' ) | .database[] | select ( .name == "WSO2IDENTITY_DB") | .username' ${INFRA_JSON})
-    export WSO2IDENTITY_DB_PASSWORD=$(jq -r '.jdbc[] | select ( .name == '\"${db_name}\"' ) | .database[] | select ( .name == "WSO2IDENTITY_DB") | .password' ${INFRA_JSON})
+    export WSO2IDENTITY_DB_USERNAME=$(jq -r '.jdbc[] | select ( .name == '\"${db_name}\"' ) | .database[] | select ( .name == "DB_USERNAME") | .username' ${INFRA_JSON})
+    export WSO2IDENTITY_DB_PASSWORD=$(jq -r '.jdbc[] | select ( .name == '\"${db_name}\"' ) | .database[] | select ( .name == "DB_PASSWORD") | .password' ${INFRA_JSON})
     export WSO2IDENTITY_DB_VALIDATION_QUERY=$(jq -r '.jdbc[] | select ( .name == '\"${db_name}\"' ) | .validation_query' ${INFRA_JSON})
     
 }
@@ -143,6 +143,15 @@ log_info "Copying product pack to Repository"
 ls $TESTGRID_DIR
 rm -rf $TESTGRID_DIR/$PRODUCT_NAME-$PRODUCT_VERSION.zip
 ls $TESTGRID_DIR
+
+# Update database configurations in deployment.toml before re-zipping
+log_info "Updating database configurations in deployment.toml"
+wget -q https://integration-testgrid-resources.s3.us-east-1.amazonaws.com/iam-support-scripts/update_db_configs.sh
+cp update_db_configs.sh $TESTGRID_DIR/
+bash $TESTGRID_DIR/update_db_configs.sh $DB_TYPE $PRODUCT_NAME-$PRODUCT_VERSION
+
+# Re-zip the pack after configuration updates
+log_info "Re-zipping product pack with updated configurations"
 zip -q -r $TESTGRID_DIR/$PRODUCT_NAME-$PRODUCT_VERSION.zip $PRODUCT_NAME-$PRODUCT_VERSION
 
 log_info "Navigating to integration test module directory"
@@ -150,7 +159,7 @@ ls $INT_TEST_MODULE_DIR
 
 # Check for master branch execution or tag-based execution
 if [[ "$PRODUCT_VERSION" != *"SNAPSHOT"* ]]; then
-    cd $TESTGRID_DIR/$PRODUCT_REPOSITORY_NAME
+    cd $TESTGRID_DIR/$PRODUCT_REPOSITORY_NAME || log_error "Failed to navigate to product repository directory"
     echo $JAVA_HOME
     #If support add the nexus repository to the pom.xml
     if [[ "$PRODUCT_REPOSITORY_BRANCH" == *"support"* ]]; then
@@ -166,7 +175,7 @@ if [[ "$PRODUCT_VERSION" != *"SNAPSHOT"* ]]; then
     echo "Copying pack to target"
     mv $TESTGRID_DIR/$PRODUCT_NAME-$PRODUCT_VERSION.zip $PRODUCT_REPOSITORY_PACK_DIR/$PRODUCT_NAME-$PRODUCT_VERSION.zip
     ls $PRODUCT_REPOSITORY_PACK_DIR
-    cd $INT_TEST_MODULE_DIR
+    cd $INT_TEST_MODULE_DIR || log_error "Failed to navigate to integration test module directory"
     log_info "Running Maven clean install"
     export JAVA_HOME=/opt/${jdk_name}
     echo $JAVA_HOME
@@ -175,7 +184,7 @@ else
     echo "Copying pack to target"
     mv $TESTGRID_DIR/$PRODUCT_NAME-$PRODUCT_VERSION.zip $PRODUCT_REPOSITORY_PACK_DIR/$PRODUCT_NAME-$PRODUCT_VERSION.zip
     ls $PRODUCT_REPOSITORY_PACK_DIR
-    cd $INT_TEST_MODULE_DIR
+    cd $INT_TEST_MODULE_DIR || log_error "Failed to navigate to integration test module directory"
     log_info "Running Maven clean install"
     mvn clean install
 fi
