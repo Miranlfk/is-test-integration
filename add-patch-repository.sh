@@ -20,14 +20,54 @@
 
 
 POM_FILE="pom.xml"
-REPO_FILE="add_u2.xml"
+# Create a backup of the original POM file
+cp "$POM_FILE" "$POM_FILE.bak"
+echo "Created backup at $POM_FILE.bak"
 
-# Read WSO2 repository configuration from add_u2.xml
-WSO2_REPO=$(<"$REPO_FILE")
+# Function to fix <n> tags to <name> tags (if they exist)
+fix_name_tags() {
+    # Create a temporary file
+    TEMP_FIX=$(mktemp)
+    
+    # Use perl to replace <n> with <name> tags in repository sections
+    perl -pe 's/<n>(.*?)<\/n>/<name>$1<\/name>/g' "$POM_FILE" > "$TEMP_FIX"
+    
+    # Check if any replacements were actually made
+    if diff -q "$POM_FILE" "$TEMP_FIX" >/dev/null; then
+        # Files are identical, no changes were made
+        rm "$TEMP_FIX"
+        echo "No <n> tags found in the repository. Configuration is correct."
+    else
+        # Files differ, changes were made
+        mv "$TEMP_FIX" "$POM_FILE"
+        echo "Repository name tags fixed."
+    fi
+}
+
+# Define the WSO2 repository directly to avoid any formatting issues
+WSO2_REPO='        <repository>
+            <id>wso2-nexus-u2-update-repo</id>
+            <name>Support Nexus Repository of WSO2</name>
+            <url>https://support-maven.wso2.org/nexus/content/repositories/updates-2.0/</url>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>daily</updatePolicy>
+                <checksumPolicy>ignore</checksumPolicy>
+            </releases>
+        </repository>'
 
 # Check if WSO2 repository already exists
 if grep -q '<url>https://support-maven.wso2.org/nexus/content/repositories/updates-2.0/</url>' "$POM_FILE"; then
-    echo "WSO2 repository already exists in pom.xml"
+    echo "WSO2 repository URL already exists in pom.xml"
+    
+    # Fix any <n> tags to <name> tags
+    if grep -q '<n>' "$POM_FILE"; then
+        echo "Fixing incorrect name tag format in repository..."
+        fix_name_tags
+    else
+        echo "Repository configuration looks correct. No changes needed."
+    fi
+    
     exit 0
 fi
 
@@ -46,27 +86,22 @@ if grep -q '<repositories>' "$POM_FILE"; then
 else
     ADDED=false
     while IFS= read -r line; do
+        echo "$line" >> "$TEMP_FILE"
         if [[ "$line" == *"<scm>"* ]] && [ "$ADDED" = false ]; then
             echo "    <repositories>" >> "$TEMP_FILE"
             echo "$WSO2_REPO" >> "$TEMP_FILE"
             echo "    </repositories>" >> "$TEMP_FILE"
             ADDED=true
+        elif [[ "$line" == *"</project>"* ]] && [ "$ADDED" = false ]; then
+            # Insert before the closing project tag
+            sed -i '' '$d' "$TEMP_FILE" # Remove the last line which is </project>
+            echo "    <repositories>" >> "$TEMP_FILE"
+            echo "$WSO2_REPO" >> "$TEMP_FILE"
+            echo "    </repositories>" >> "$TEMP_FILE"
+            echo "$line" >> "$TEMP_FILE" # Add back the </project> line
+            ADDED=true
         fi
-        echo "$line" >> "$TEMP_FILE"
     done < "$POM_FILE"
-    if [ "$ADDED" = false ]; then
-        while IFS= read -r line; do
-            if [[ "$line" == *"</project>"* ]]; then
-                if [ "$ADDED" = false ]; then
-                    echo "    <repositories>" >> "$TEMP_FILE"
-                    echo "$WSO2_REPO" >> "$TEMP_FILE"
-                    echo "    </repositories>" >> "$TEMP_FILE"
-                    ADDED=true
-                fi
-            fi
-            echo "$line" >> "$TEMP_FILE"
-        done < "$POM_FILE"
-    fi
     echo "New <repositories> section added with WSO2 repository."
 fi
 
@@ -77,3 +112,9 @@ fi
 
 # Replace the original POM file with the modified one
 mv "$TEMP_FILE" "$POM_FILE"
+
+# Fix any <n> tags to <name> tags
+if grep -q '<n>' "$POM_FILE"; then
+    echo "Fixing incorrect name tag format in repository..."
+    fix_name_tags
+fi

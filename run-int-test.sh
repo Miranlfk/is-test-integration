@@ -165,8 +165,9 @@ if [[ "$PRODUCT_VERSION" != *"SNAPSHOT"* ]]; then
     if [[ "$PRODUCT_REPOSITORY_BRANCH" == *"support"* ]]; then
         log_info "Add WSO2 repository to pom.xml"
         cp $TESTGRID_DIR/add-patch-repository.sh $TESTGRID_DIR/$PRODUCT_REPOSITORY_NAME/
-        cp $TESTGRID_DIR/add_u2.xml $TESTGRID_DIR/$PRODUCT_REPOSITORY_NAME/
+        cp $TESTGRID_DIR/add-patch-repository.sh $INT_TEST_MODULE_DIR/
         bash $TESTGRID_DIR/$PRODUCT_REPOSITORY_NAME/add-patch-repository.sh
+        bash $INT_TEST_MODULE_DIR/add-patch-repository.sh
     fi
     log_info "Running Maven clean install"
     #For Tag-based execution we initially build the product pack and then run the integration tests
