@@ -81,7 +81,7 @@ if [[ $DB_ENGINE = "postgres" ]]; then
     # DB Engine : Postgres
     echo "Postgres DB Engine Selected! Running WSO2-IS $WSO2_PRODUCT_VERSION DB Scripts for Postgres..."
     export PGPASSWORD=CF_DB_PASSWORD
-    psql -U CF_DB_USERNAME -h CF_DB_HOST -p CF_DB_PORT -d postgres -f /opt/testgrid/workspace/$WSO2_PRODUCT_VERSION_SHORT/is_postgres.sql
+    psql -U CF_DB_USERNAME -h CF_DB_HOST -p CF_DB_PORT -d IAMDB -f /opt/testgrid/workspace/$WSO2_PRODUCT_VERSION_SHORT/is_postgres.sql
 elif [[ $DB_ENGINE = "mysql" ]]; then
     # DB Engine : MySQL
     echo "MySQL DB Engine Selected! Running WSO2-IS $WSO2_PRODUCT_VERSION DB Scripts for MySQL..."
