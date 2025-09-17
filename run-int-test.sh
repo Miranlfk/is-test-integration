@@ -88,6 +88,10 @@ function set_jdk(){
         #setting JAVA_HOME to JDK 11 to compile
         install_jdk11
         echo $JAVA_HOME 
+    elif [[ "$jdk_name" == "ADOPT_OPEN_JDK8" ]]; then
+        echo "Installing " + $jdk_name
+        install_jdks
+        echo $JAVA_HOME
     else
         echo "Installing " + $jdk_name
         install_jdks
