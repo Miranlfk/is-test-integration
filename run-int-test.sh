@@ -22,7 +22,7 @@ set -o xtrace
 
 TESTGRID_DIR=/opt/testgrid/workspace
 INFRA_JSON='infra.json'
-
+M2_REPO_DIR=/opt/testgrid/m2-repo
 PRODUCT_REPOSITORY=$1
 PRODUCT_REPOSITORY_BRANCH=$2
 PRODUCT_NAME="wso2$3"
@@ -141,6 +141,9 @@ sed -i "s|DB_NAME|${DB_NAME}|g" ${INFRA_JSON}
 
 export_db_params ${DB_TYPE}
 
+mkdir -p $M2_REPO_DIR
+export MAVEN_OPTS="-Dmaven.repo.local=$M2_REPO_DIR"
+
 # delete if the folder is available
 rm -rf $PRODUCT_REPOSITORY_PACK_DIR
 mkdir -p $PRODUCT_REPOSITORY_PACK_DIR
@@ -170,14 +173,12 @@ if [[ "$PRODUCT_VERSION" != *"SNAPSHOT"* ]]; then
     if [[ "$PRODUCT_REPOSITORY_BRANCH" == *"support"* ]]; then
         log_info "Add WSO2 repository to pom.xml"
         cp $TESTGRID_DIR/add-patch-repository.sh $TESTGRID_DIR/$PRODUCT_REPOSITORY_NAME/
-        cp $TESTGRID_DIR/add-patch-repository.sh $INT_TEST_MODULE_DIR/
         bash $TESTGRID_DIR/$PRODUCT_REPOSITORY_NAME/add-patch-repository.sh
-        bash $INT_TEST_MODULE_DIR/add-patch-repository.sh
     fi
     log_info "Running Maven clean install"
     #For Tag-based execution we initially build the product pack and then run the integration tests
     echo $JAVA_HOME
-    mvn clean install -Dmaven.test.skip=true
+    mvn -Dmaven.repo.local="$M2_REPO_DIR" clean install -Dmaven.test.skip=true
     echo "Copying pack to target"
     mv $TESTGRID_DIR/$PRODUCT_NAME-$PRODUCT_VERSION.zip $PRODUCT_REPOSITORY_PACK_DIR/$PRODUCT_NAME-$PRODUCT_VERSION.zip
     ls $PRODUCT_REPOSITORY_PACK_DIR
@@ -192,5 +193,5 @@ else
     ls $PRODUCT_REPOSITORY_PACK_DIR
     cd $INT_TEST_MODULE_DIR || log_error "Failed to navigate to integration test module directory"
     log_info "Running Maven clean install"
-    mvn clean install
+    mvn -Dmaven.repo.local="$M2_REPO_DIR" clean install
 fi
