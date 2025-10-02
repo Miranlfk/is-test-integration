@@ -125,11 +125,12 @@ then
     git clone https://${GIT_USER}:${GIT_PASS}@$PRODUCT_REPOSITORY --branch $PRODUCT_REPOSITORY_BRANCH --single-branch
 fi
 
+
+wget -q "https://raw.githubusercontent.com/Miranlfk/testgrid-jenkins-library/refs/heads/add-script/scripts/is/intg/infra.json"
 log_info "Exporting JDK"
 set_jdk ${JDK_TYPE}
 
 pwd
-wget -q "https://raw.githubusercontent.com/Miranlfk/testgrid-jenkins-library/refs/heads/add-script/scripts/is/intg/infra.json"
 db_file=$(jq -r '.jdbc[] | select ( .name == '\"${DB_TYPE}\"') | .file_name' ${INFRA_JSON})
 wget -q https://integration-testgrid-resources.s3.amazonaws.com/lib/jdbc/${db_file}.jar  -P $TESTGRID_DIR/${PRODUCT_PACK_NAME}/repository/components/lib
 
@@ -141,8 +142,8 @@ sed -i "s|DB_NAME|${DB_NAME}|g" ${INFRA_JSON}
 
 export_db_params ${DB_TYPE}
 
-mkdir -p $M2_REPO_DIR
-export MAVEN_OPTS="-Dmaven.repo.local=$M2_REPO_DIR"
+# mkdir -p $M2_REPO_DIR
+# export MAVEN_OPTS="-Dmaven.repo.local=$M2_REPO_DIR"
 
 # delete if the folder is available
 rm -rf $PRODUCT_REPOSITORY_PACK_DIR
@@ -178,7 +179,7 @@ if [[ "$PRODUCT_VERSION" != *"SNAPSHOT"* ]]; then
     log_info "Running Maven clean install"
     #For Tag-based execution we initially build the product pack and then run the integration tests
     echo $JAVA_HOME
-    mvn -Dmaven.repo.local="$M2_REPO_DIR" clean install -Dmaven.test.skip=true
+    mvn clean install -Dmaven.test.skip=true -U
     echo "Copying pack to target"
     mv $TESTGRID_DIR/$PRODUCT_NAME-$PRODUCT_VERSION.zip $PRODUCT_REPOSITORY_PACK_DIR/$PRODUCT_NAME-$PRODUCT_VERSION.zip
     ls $PRODUCT_REPOSITORY_PACK_DIR
@@ -193,5 +194,5 @@ else
     ls $PRODUCT_REPOSITORY_PACK_DIR
     cd $INT_TEST_MODULE_DIR || log_error "Failed to navigate to integration test module directory"
     log_info "Running Maven clean install"
-    mvn -Dmaven.repo.local="$M2_REPO_DIR" clean install
+    mvn clean install -U
 fi
