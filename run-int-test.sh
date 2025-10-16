@@ -59,7 +59,11 @@ function log_error(){
 }
 
 function install_jdk11(){
-    jdk11="ADOPT_OPEN_JDK11"
+    if [[ "$JDK_TYPE" == "ADOPT_OPEN_JDK17_ARM" ]] || [[ "$JDK_TYPE" == "ADOPT_OPEN_JDK21_ARM" ]]; then
+        jdk11="ADOPT_OPEN_JDK11_ARM"
+    else
+        jdk11="ADOPT_OPEN_JDK11"
+    fi
     mkdir -p /opt/${jdk11}
     jdk_file2=$(jq -r '.jdk[] | select ( .name == '\"${jdk11}\"') | .file_name' ${INFRA_JSON})
     wget -q https://integration-testgrid-resources.s3.amazonaws.com/lib/jdk/$jdk_file2.tar.gz
@@ -81,7 +85,7 @@ function install_jdks(){
 function set_jdk(){
     jdk_name=$1
     #When running Integration tests for JDK 17 or 21, JDK 11 is also required for compilation.
-    if [[ "$jdk_name" == "ADOPT_OPEN_JDK17" ]] || [[ "$jdk_name" == "ADOPT_OPEN_JDK21" ]]; then
+    if [[ "$jdk_name" == "ADOPT_OPEN_JDK17" ]] || [[ "$jdk_name" == "ADOPT_OPEN_JDK21" ]] || [[ "$jdk_name" == "ADOPT_OPEN_JDK17_ARM" ]] || [[ "$jdk_name" == "ADOPT_OPEN_JDK21_ARM" ]]; then
         echo "Installing " + $jdk_name
         install_jdks
         echo $JAVA_HOME
