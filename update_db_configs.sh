@@ -70,6 +70,7 @@ cp "$DEPLOYMENT_TOML" "$BACKUP_TOML"
 # Extract database info from infra.json
 IDENTITY_DB=$(jq -r --arg db "$DB_TYPE" '.jdbc[] | select(.name == $db) | .database[] | select(.name == "WSO2IDENTITY_DB")' "$INFRA_JSON")
 SHARED_DB=$(jq -r --arg db "$DB_TYPE" '.jdbc[] | select(.name == $db) | .database[] | select(.name == "WSO2SHARED_DB")' "$INFRA_JSON")
+AGENTIDENTITY_DB=$(jq -r --arg db "$DB_TYPE" '.jdbc[] | select(.name == $db) | .database[] | select(.name == "WSO2AGENTIDENTITY_DB")' "$INFRA_JSON")
 
 # Extract values for identity_db
 IDENTITY_URL=$(echo "$IDENTITY_DB" | jq -r '.url')
@@ -80,6 +81,10 @@ IDENTITY_PASSWORD=$(echo "$IDENTITY_DB" | jq -r '.password')
 SHARED_URL=$(echo "$SHARED_DB" | jq -r '.url')
 SHARED_USERNAME=$(echo "$SHARED_DB" | jq -r '.username')
 SHARED_PASSWORD=$(echo "$SHARED_DB" | jq -r '.password')
+
+AGENTIDENTITY_URL=$(echo "$AGENTIDENTITY_DB" | jq -r '.url')
+AGENTIDENTITY_USERNAME=$(echo "$AGENTIDENTITY_DB" | jq -r '.username')
+AGENTIDENTITY_PASSWORD=$(echo "$AGENTIDENTITY_DB" | jq -r '.password')
 
 # For oracle, we'll use oracle-se2 even though we map it to "oracle" for display
 if [ "$DB_TYPE_INPUT" = "oracle-se2" ] || [ "$DB_TYPE_INPUT" = "oracle-se2-cdb" ]; then
@@ -120,7 +125,34 @@ fi
             while IFS= read -r shared_section_line; do
               if [[ "$shared_section_line" =~ ^\[ ]]; then
                 # We reached the next section after shared_db
-                echo "$shared_section_line"
+                if [[ "$shared_section_line" =~ ^\[datasource.AgentIdentity\] ]]; then
+                  # Write AgentIdentity datasource section if AGENTIDENTITY_DB exists
+                  if [ -n "$AGENTIDENTITY_URL" ] && [ "$AGENTIDENTITY_URL" != "null" ]; then
+                    echo "[datasource.AgentIdentity]"
+                    echo "id = \"AgentIdentity\""
+                    echo "type = \"$DB_TYPE\""
+                    echo "url = \"$AGENTIDENTITY_URL\""
+                    echo "username = \"$AGENTIDENTITY_USERNAME\""
+                    echo "password = \"$AGENTIDENTITY_PASSWORD\""
+                    echo "driver = \"$DRIVER\""
+                    echo "validationQuery = \"$VALIDATION_QUERY\""
+                    echo ""
+                    
+                    # Skip the original AgentIdentity section
+                    while IFS= read -r agent_section_line; do
+                      if [[ "$agent_section_line" =~ ^\[ ]]; then
+                        # We reached the next section after AgentIdentity
+                        echo "$agent_section_line"
+                        break
+                      fi
+                    done
+                  else
+                    # If no AGENTIDENTITY_DB in infra.json, keep the original section
+                    echo "$shared_section_line"
+                  fi
+                else
+                  echo "$shared_section_line"
+                fi
                 break
               fi
             done

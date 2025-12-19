@@ -26,64 +26,161 @@ SCRIPT_LOCATION='CF_SCRIPT_LOCATION'
 WSO2_PRODUCT_VERSION_SHORT='CF_PRODUCT_VERSION_SHORT'
 
 if [ $DB_ENGINE = "postgres" ]; then
-  sql_files=("$SCRIPT_LOCATION/postgresql.sql" "$SCRIPT_LOCATION/identity/postgresql.sql" "$SCRIPT_LOCATION/consent/postgresql.sql")
-  output_file="$WSO2_PRODUCT_VERSION_SHORT/is_postgres.sql"
-  # Ensure the output file exists (it will not be overwritten)
-  touch "$output_file"
+  # Create database creation script
+  db_create_file="$WSO2_PRODUCT_VERSION_SHORT/is_postgres_db_create.sql"
+  touch "$db_create_file"
+  echo "-- PostgreSQL Database Creation Script" > "$db_create_file"
+  echo "DROP DATABASE IF EXISTS \"WSO2IS_SHARED_DB\";" >> "$db_create_file"
+  echo "DROP DATABASE IF EXISTS \"WSO2IS_BPS_DB\";" >> "$db_create_file"
+  echo "DROP DATABASE IF EXISTS \"WSO2IS_IDENTITY_DB\";" >> "$db_create_file"
+  echo "DROP DATABASE IF EXISTS \"WSO2IS_CONSENT_DB\";" >> "$db_create_file"
+  echo "DROP DATABASE IF EXISTS \"WSO2_METRICS_DB\";" >> "$db_create_file"
+  echo "DROP DATABASE IF EXISTS \"WSO2IS_AGENTIDENTITY_DB\";" >> "$db_create_file"
+  echo "" >> "$db_create_file"
+  echo "CREATE DATABASE \"WSO2IS_SHARED_DB\";" >> "$db_create_file"
+  echo "CREATE DATABASE \"WSO2IS_BPS_DB\";" >> "$db_create_file"
+  echo "CREATE DATABASE \"WSO2IS_IDENTITY_DB\";" >> "$db_create_file"
+  echo "CREATE DATABASE \"WSO2IS_CONSENT_DB\";" >> "$db_create_file"
+  echo "CREATE DATABASE \"WSO2_METRICS_DB\";" >> "$db_create_file"
+  echo "CREATE DATABASE \"WSO2IS_AGENTIDENTITY_DB\";" >> "$db_create_file"
   
-  # Loop through files and append content
-  for i in "${!sql_files[@]}"; do
-    cat "${sql_files[$i]}" >> "$output_file"
-    echo "" >> "$output_file"
+  # Create schema scripts for each database
+  sql_files=("$SCRIPT_LOCATION/postgresql.sql" "$SCRIPT_LOCATION/identity/postgresql.sql" "$SCRIPT_LOCATION/consent/postgresql.sql" "$SCRIPT_LOCATION/identity/agent/postgresql.sql")
+  output_files=("$WSO2_PRODUCT_VERSION_SHORT/is_postgres_shared.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_postgres_identity.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_postgres_consent.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_postgres_agent_identity.sql")
+  
+  for i in "${!output_files[@]}"; do
+    touch "${output_files[$i]}"
+    cat "${sql_files[$i]}" >> "${output_files[$i]}"
+    echo "" >> "${output_files[$i]}"
   done
 
 elif [ $DB_ENGINE = "mysql" ]; then
-  sql_files=("$SCRIPT_LOCATION/mysql.sql" "$SCRIPT_LOCATION/identity/mysql.sql" "$SCRIPT_LOCATION/consent/mysql.sql")
-  output_files=("$WSO2_PRODUCT_VERSION_SHORT/is_mysql.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_mysql5.7.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_mysql_8.sql")
+  # Create database creation script
+  db_create_file="$WSO2_PRODUCT_VERSION_SHORT/is_mysql_db_create.sql"
+  touch "$db_create_file"
+  echo "-- MySQL Database Creation Script" > "$db_create_file"
+  echo "DROP DATABASE IF EXISTS WSO2IS_SHARED_DB;" >> "$db_create_file"
+  echo "DROP DATABASE IF EXISTS WSO2IS_IDENTITY_DB;" >> "$db_create_file"
+  echo "DROP DATABASE IF EXISTS WSO2IS_BPS_DB;" >> "$db_create_file"
+  echo "DROP DATABASE IF EXISTS WSO2IS_CONSENT_DB;" >> "$db_create_file"
+  echo "DROP DATABASE IF EXISTS WSO2_METRICS_DB;" >> "$db_create_file"
+  echo "DROP DATABASE IF EXISTS WSO2_CLUSTER_DB;" >> "$db_create_file"
+  echo "DROP DATABASE IF EXISTS IS_ANALYTICS_DB;" >> "$db_create_file"
+  echo "DROP DATABASE IF EXISTS WSO2_CARBON_DB;" >> "$db_create_file"
+  echo "DROP DATABASE IF EXISTS WSO2_PERSISTENCE_DB;" >> "$db_create_file"
+  echo "DROP DATABASE IF EXISTS WSO2_STATUS_DASHBOARD_DB;" >> "$db_create_file"
+  echo "DROP DATABASE IF EXISTS WSO2IS_AGENTIDENTITY_DB;" >> "$db_create_file"
+  echo "" >> "$db_create_file"
+  echo "CREATE DATABASE WSO2IS_SHARED_DB character set latin1;" >> "$db_create_file"
+  echo "CREATE DATABASE WSO2IS_IDENTITY_DB character set latin1;" >> "$db_create_file"
+  echo "CREATE DATABASE WSO2IS_BPS_DB character set latin1;" >> "$db_create_file"
+  echo "CREATE DATABASE WSO2IS_CONSENT_DB character set latin1;" >> "$db_create_file"
+  echo "CREATE DATABASE WSO2_METRICS_DB character set latin1;" >> "$db_create_file"
+  echo "CREATE DATABASE WSO2_CLUSTER_DB character set latin1;" >> "$db_create_file"
+  echo "CREATE DATABASE IS_ANALYTICS_DB character set latin1;" >> "$db_create_file"
+  echo "CREATE DATABASE WSO2_CARBON_DB character set latin1;" >> "$db_create_file"
+  echo "CREATE DATABASE WSO2_PERSISTENCE_DB character set latin1;" >> "$db_create_file"
+  echo "CREATE DATABASE WSO2_STATUS_DASHBOARD_DB character set latin1;" >> "$db_create_file"
+  echo "CREATE DATABASE WSO2IS_AGENTIDENTITY_DB character set latin1;" >> "$db_create_file"
   
-  # Ensure the output files exist (they will not be overwritten)
-  for output_file in "${output_files[@]}"; do
-    touch "$output_file"
-  done
+  # Create schema scripts for each database
+  sql_files=("$SCRIPT_LOCATION/mysql.sql" "$SCRIPT_LOCATION/identity/mysql.sql" "$SCRIPT_LOCATION/consent/mysql.sql" "$SCRIPT_LOCATION/identity/agent/mysql.sql")
+  output_files=("$WSO2_PRODUCT_VERSION_SHORT/is_mysql_shared.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_mysql_identity.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_mysql_consent.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_mysql_agent_identity.sql")
   
-  # Loop through files and append content
-  for i in "${!sql_files[@]}"; do
-    for output_file in "${output_files[@]}"; do
-      cat "${sql_files[$i]}" >> "$output_file"
-      echo "" >> "$output_file"
-    done
+  for i in "${!output_files[@]}"; do
+    touch "${output_files[$i]}"
+    cat "${sql_files[$i]}" >> "${output_files[$i]}"
+    echo "" >> "${output_files[$i]}"
   done
 
 elif [ $DB_ENGINE = "mariadb" ]; then
-  sql_files=("$SCRIPT_LOCATION/mysql.sql" "$SCRIPT_LOCATION/identity/mysql.sql" "$SCRIPT_LOCATION/consent/mysql.sql")
-  output_file="$WSO2_PRODUCT_VERSION_SHORT/is_mysql.sql"
+  # Create database creation script
+  db_create_file="$WSO2_PRODUCT_VERSION_SHORT/is_mariadb_db_create.sql"
+  touch "$db_create_file"
+  echo "-- MariaDB Database Creation Script" > "$db_create_file"
+  echo "DROP DATABASE IF EXISTS WSO2IS_SHARED_DB;" >> "$db_create_file"
+  echo "DROP DATABASE IF EXISTS WSO2IS_IDENTITY_DB;" >> "$db_create_file"
+  echo "DROP DATABASE IF EXISTS WSO2IS_BPS_DB;" >> "$db_create_file"
+  echo "DROP DATABASE IF EXISTS WSO2IS_CONSENT_DB;" >> "$db_create_file"
+  echo "DROP DATABASE IF EXISTS WSO2_METRICS_DB;" >> "$db_create_file"
+  echo "DROP DATABASE IF EXISTS WSO2_CLUSTER_DB;" >> "$db_create_file"
+  echo "DROP DATABASE IF EXISTS IS_ANALYTICS_DB;" >> "$db_create_file"
+  echo "DROP DATABASE IF EXISTS WSO2_CARBON_DB;" >> "$db_create_file"
+  echo "DROP DATABASE IF EXISTS WSO2_PERSISTENCE_DB;" >> "$db_create_file"
+  echo "DROP DATABASE IF EXISTS WSO2_STATUS_DASHBOARD_DB;" >> "$db_create_file"
+  echo "DROP DATABASE IF EXISTS WSO2IS_AGENTIDENTITY_DB;" >> "$db_create_file"
+  echo "" >> "$db_create_file"
+  echo "CREATE DATABASE WSO2IS_SHARED_DB character set latin1;" >> "$db_create_file"
+  echo "CREATE DATABASE WSO2IS_IDENTITY_DB character set latin1;" >> "$db_create_file"
+  echo "CREATE DATABASE WSO2IS_BPS_DB character set latin1;" >> "$db_create_file"
+  echo "CREATE DATABASE WSO2IS_CONSENT_DB character set latin1;" >> "$db_create_file"
+  echo "CREATE DATABASE WSO2_METRICS_DB character set latin1;" >> "$db_create_file"
+  echo "CREATE DATABASE WSO2_CLUSTER_DB character set latin1;" >> "$db_create_file"
+  echo "CREATE DATABASE IS_ANALYTICS_DB character set latin1;" >> "$db_create_file"
+  echo "CREATE DATABASE WSO2_CARBON_DB character set latin1;" >> "$db_create_file"
+  echo "CREATE DATABASE WSO2_PERSISTENCE_DB character set latin1;" >> "$db_create_file"
+  echo "CREATE DATABASE WSO2_STATUS_DASHBOARD_DB character set latin1;" >> "$db_create_file"
+  echo "CREATE DATABASE WSO2IS_AGENTIDENTITY_DB character set latin1;" >> "$db_create_file"
   
-  # Ensure the output file exists (it will not be overwritten)
-  touch "$output_file"
+  # Create schema scripts for each database
+  sql_files=("$SCRIPT_LOCATION/mysql.sql" "$SCRIPT_LOCATION/identity/mysql.sql" "$SCRIPT_LOCATION/consent/mysql.sql" "$SCRIPT_LOCATION/identity/agent/mysql.sql")
+  output_files=("$WSO2_PRODUCT_VERSION_SHORT/is_mariadb_shared.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_mariadb_identity.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_mariadb_consent.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_mariadb_agent_identity.sql")
   
-  # Loop through files and append content
-  for i in "${!sql_files[@]}"; do
-    cat "${sql_files[$i]}" >> "$output_file"
-    echo "" >> "$output_file"
+  for i in "${!output_files[@]}"; do
+    touch "${output_files[$i]}"
+    cat "${sql_files[$i]}" >> "${output_files[$i]}"
+    echo "" >> "${output_files[$i]}"
   done
 
 elif [ $DB_ENGINE = "sqlserver-se" ]; then
-  sql_files=("$SCRIPT_LOCATION/mssql.sql" "$SCRIPT_LOCATION/identity/mssql.sql" "$SCRIPT_LOCATION/consent/mssql.sql")
-  output_file="$WSO2_PRODUCT_VERSION_SHORT/is_mssql.sql"
+  # Create database creation script
+  db_create_file="$WSO2_PRODUCT_VERSION_SHORT/is_mssql_db_create.sql"
+  touch "$db_create_file"
+  echo "-- SQL Server Database Creation Script" > "$db_create_file"
+  echo "DROP DATABASE IF EXISTS WSO2IS_SHARED_DB;" >> "$db_create_file"
+  echo "DROP DATABASE IF EXISTS WSO2IS_BPS_DB;" >> "$db_create_file"
+  echo "DROP DATABASE IF EXISTS WSO2IS_IDENTITY_DB;" >> "$db_create_file"
+  echo "DROP DATABASE IF EXISTS WSO2IS_CONSENT_DB;" >> "$db_create_file"
+  echo "DROP DATABASE IF EXISTS WSO2_METRICS_DB;" >> "$db_create_file"
+  echo "DROP DATABASE IF EXISTS WSO2IS_AGENTIDENTITY_DB;" >> "$db_create_file"
+  echo "GO" >> "$db_create_file"
+  echo "" >> "$db_create_file"
+  echo "CREATE DATABASE WSO2IS_SHARED_DB;" >> "$db_create_file"
+  echo "CREATE DATABASE WSO2IS_BPS_DB;" >> "$db_create_file"
+  echo "CREATE DATABASE WSO2IS_IDENTITY_DB;" >> "$db_create_file"
+  echo "CREATE DATABASE WSO2IS_CONSENT_DB;" >> "$db_create_file"
+  echo "CREATE DATABASE WSO2_METRICS_DB;" >> "$db_create_file"
+  echo "CREATE DATABASE WSO2IS_AGENTIDENTITY_DB;" >> "$db_create_file"
+  echo "GO" >> "$db_create_file"
   
-  # Ensure the output file exists (it will not be overwritten)
-  touch "$output_file"
+  # Create schema scripts for each database
+  sql_files=("$SCRIPT_LOCATION/mssql.sql" "$SCRIPT_LOCATION/identity/mssql.sql" "$SCRIPT_LOCATION/consent/mssql.sql" "$SCRIPT_LOCATION/identity/agent/mssql.sql")
+  output_files=("$WSO2_PRODUCT_VERSION_SHORT/is_mssql_shared.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_mssql_identity.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_mssql_consent.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_mssql_agent_identity.sql")
   
-  # Loop through files and append content
-  for i in "${!sql_files[@]}"; do
-    cat "${sql_files[$i]}" >> "$output_file"
-    echo "" >> "$output_file"
+  for i in "${!output_files[@]}"; do
+    touch "${output_files[$i]}"
+    # Add USE DATABASE statement for SQL Server
+    if [ $i -eq 0 ]; then
+      echo "USE WSO2IS_SHARED_DB;" >> "${output_files[$i]}"
+      echo "GO" >> "${output_files[$i]}"
+    elif [ $i -eq 1 ]; then
+      echo "USE WSO2IS_IDENTITY_DB;" >> "${output_files[$i]}"
+      echo "GO" >> "${output_files[$i]}"
+    elif [ $i -eq 2 ]; then
+      echo "USE WSO2IS_CONSENT_DB;" >> "${output_files[$i]}"
+      echo "GO" >> "${output_files[$i]}"
+    elif [ $i -eq 3 ]; then
+      echo "USE WSO2IS_AGENTIDENTITY_DB;" >> "${output_files[$i]}"
+      echo "GO" >> "${output_files[$i]}"
+    fi
+    cat "${sql_files[$i]}" >> "${output_files[$i]}"
+    echo "" >> "${output_files[$i]}"
   done
 
 elif [ $DB_ENGINE = "oracle-se" ]; then
-  sql_files=("$SCRIPT_LOCATION/oracle.sql" "$SCRIPT_LOCATION/identity/oracle.sql" "$SCRIPT_LOCATION/consent/oracle.sql")
-  databases=("WSO2IS_SHARED_DB" "WSO2IS_IDENTITY_DB" "WSO2IS_CONSENT_DB")
-  output_files=("$WSO2_PRODUCT_VERSION_SHORT/is_oracle_common.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_oracle_identity.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_oracle_consent.sql")
+  sql_files=("$SCRIPT_LOCATION/oracle.sql" "$SCRIPT_LOCATION/identity/oracle.sql" "$SCRIPT_LOCATION/consent/oracle.sql" "$SCRIPT_LOCATION/identity/agent/oracle.sql")
+  databases=("WSO2IS_SHARED_DB" "WSO2IS_IDENTITY_DB" "WSO2IS_CONSENT_DB" "WSO2IS_AGENT_IDENTITY_DB")
+  output_files=("$WSO2_PRODUCT_VERSION_SHORT/is_oracle_common.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_oracle_identity.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_oracle_consent.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_oracle_agent_identity.sql")
   
   # Ensure the output files exist (they will not be overwritten)
   for output_file in "${output_files[@]}"; do
@@ -96,16 +193,35 @@ elif [ $DB_ENGINE = "oracle-se" ]; then
   done
 
 elif [ $DB_ENGINE = "db2-se" ]; then
-  sql_files=("$SCRIPT_LOCATION/db2.sql" "$SCRIPT_LOCATION/identity/db2.sql" "$SCRIPT_LOCATION/consent/db2.sql")
-  output_file="$WSO2_PRODUCT_VERSION_SHORT/is_db2.sql"
+  # Create database creation script
+  db_create_file="$WSO2_PRODUCT_VERSION_SHORT/is_db2_db_create.sql"
+  touch "$db_create_file"
+  echo "-- DB2 Database Creation Script" > "$db_create_file"
+  echo "BEGIN" >> "$db_create_file"
+  echo "    DECLARE CONTINUE HANDLER FOR SQLSTATE '42704' BEGIN END;" >> "$db_create_file"
+  echo "    DROP DATABASE WSO2IS_SHARED_DB;" >> "$db_create_file"
+  echo "    DROP DATABASE WSO2IS_BPS_DB;" >> "$db_create_file"
+  echo "    DROP DATABASE WSO2IS_IDENTITY_DB;" >> "$db_create_file"
+  echo "    DROP DATABASE WSO2IS_CONSENT_DB;" >> "$db_create_file"
+  echo "    DROP DATABASE WSO2_METRICS_DB;" >> "$db_create_file"
+  echo "    DROP DATABASE WSO2IS_AGENTIDENTITY_DB;" >> "$db_create_file"
+  echo "END;" >> "$db_create_file"
+  echo "" >> "$db_create_file"
+  echo "CREATE DATABASE WSO2IS_SHARED_DB;" >> "$db_create_file"
+  echo "CREATE DATABASE WSO2IS_BPS_DB;" >> "$db_create_file"
+  echo "CREATE DATABASE WSO2IS_IDENTITY_DB;" >> "$db_create_file"
+  echo "CREATE DATABASE WSO2IS_CONSENT_DB;" >> "$db_create_file"
+  echo "CREATE DATABASE WSO2_METRICS_DB;" >> "$db_create_file"
+  echo "CREATE DATABASE WSO2IS_AGENTIDENTITY_DB;" >> "$db_create_file"
   
-  # Ensure the output file exists (it will not be overwritten)
-  touch "$output_file"
+  # Create schema scripts for each database
+  sql_files=("$SCRIPT_LOCATION/db2.sql" "$SCRIPT_LOCATION/identity/db2.sql" "$SCRIPT_LOCATION/consent/db2.sql" "$SCRIPT_LOCATION/identity/agent/db2.sql")
+  output_files=("$WSO2_PRODUCT_VERSION_SHORT/is_db2_shared.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_db2_identity.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_db2_consent.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_db2_agent_identity.sql")
   
-  # Loop through files and append content
-  for i in "${!sql_files[@]}"; do
-    cat "${sql_files[$i]}" >> "$output_file"
-    echo "" >> "$output_file"
+  for i in "${!output_files[@]}"; do
+    touch "${output_files[$i]}"
+    cat "${sql_files[$i]}" >> "${output_files[$i]}"
+    echo "" >> "${output_files[$i]}"
   done
 fi
 

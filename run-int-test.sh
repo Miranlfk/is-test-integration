@@ -157,11 +157,11 @@ ls $TESTGRID_DIR
 rm -rf $TESTGRID_DIR/$PRODUCT_NAME-$PRODUCT_VERSION.zip
 ls $TESTGRID_DIR
 
-# Update database configurations in deployment.toml before re-zipping
-# log_info "Updating database configurations in deployment.toml"
-# wget -q https://integration-testgrid-resources.s3.us-east-1.amazonaws.com/iam-support-scripts/update_db_configs.sh
-# cp update_db_configs.sh $TESTGRID_DIR/
-# bash $TESTGRID_DIR/update_db_configs.sh $DB_TYPE $PRODUCT_NAME-$PRODUCT_VERSION
+Update database configurations in deployment.toml before re-zipping
+log_info "Updating database configurations in deployment.toml"
+wget -q https://integration-testgrid-resources.s3.us-east-1.amazonaws.com/iam-support-scripts/update_db_configs.sh
+cp update_db_configs.sh $TESTGRID_DIR/
+bash $TESTGRID_DIR/update_db_configs.sh $DB_TYPE $PRODUCT_NAME-$PRODUCT_VERSION
 
 # Re-zip the pack after configuration updates
 log_info "Re-zipping product pack with updated configurations"
