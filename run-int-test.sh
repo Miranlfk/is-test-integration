@@ -178,11 +178,11 @@ ls $INT_TEST_MODULE_DIR
 
 # Check for master branch execution or tag-based execution
 if [[ "$PRODUCT_VERSION" != *"SNAPSHOT"* ]]; then
-    cp $TESTGRID_DIR/add-patch-repository.sh $TESTGRID_DIR/$PRODUCT_REPOSITORY_NAME
     cd $TESTGRID_DIR/$PRODUCT_REPOSITORY_NAME || log_error "Failed to navigate to product repository directory"
     echo $JAVA_HOME
     #If support add the nexus repository to the pom.xml
     if [[ "$PRODUCT_REPOSITORY_BRANCH" == *"support"* ]]; then
+        cp $TESTGRID_DIR/add-patch-repository.sh $TESTGRID_DIR/$PRODUCT_REPOSITORY_NAME
         log_info "Add WSO2 repository to pom.xml"
         
         bash $TESTGRID_DIR/$PRODUCT_REPOSITORY_NAME/add-patch-repository.sh
