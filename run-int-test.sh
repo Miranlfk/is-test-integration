@@ -186,7 +186,7 @@ if [[ "$PRODUCT_VERSION" != *"SNAPSHOT"* ]]; then
         log_info "Add WSO2 repository to pom.xml"
         
         bash $TESTGRID_DIR/$PRODUCT_REPOSITORY_NAME/add-patch-repository.sh
-        if [[ "$PRODUCT_VERSION" == "5.11.0" ]]
+        if [[ "$PRODUCT_VERSION" == "5.11.0" ]]; then
             cd $TESTGRID_DIR/$PRODUCT_REPOSITORY_NAME
             find . -name "*.toml" -type f -exec sed -i '/^\[user_store\]/,/^base_dn =/c\[user_store]\ntype = "database_unique_id"\n#connection_url = "ldap://localhost:${Ports.EmbeddedLDAP.LDAPServerPort}"\n#connection_name = "uid=admin,ou=system"\n#connection_password = "admin"\n#base_dn = "dc=wso2,dc=org"' {} +
         fi
