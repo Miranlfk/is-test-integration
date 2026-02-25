@@ -189,6 +189,7 @@ if [[ "$PRODUCT_VERSION" != *"SNAPSHOT"* ]]; then
         if [[ "$PRODUCT_VERSION" == "5.11.0" ]]
             cd $TESTGRID_DIR/$PRODUCT_REPOSITORY_NAME
             find . -name "*.toml" -type f -exec sed -i '/^\[user_store\]/,/^base_dn =/c\[user_store]\ntype = "database_unique_id"\n#connection_url = "ldap://localhost:${Ports.EmbeddedLDAP.LDAPServerPort}"\n#connection_name = "uid=admin,ou=system"\n#connection_password = "admin"\n#base_dn = "dc=wso2,dc=org"' {} +
+        fi
     fi
     log_info "Running Maven clean install"
     #For Tag-based execution we initially build the product pack and then run the integration tests
