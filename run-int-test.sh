@@ -188,7 +188,17 @@ if [[ "$PRODUCT_VERSION" != *"SNAPSHOT"* ]]; then
         bash $TESTGRID_DIR/$PRODUCT_REPOSITORY_NAME/add-patch-repository.sh
         if [[ "$PRODUCT_VERSION" == "5.11.0" ]]; then
             cd $TESTGRID_DIR/$PRODUCT_REPOSITORY_NAME
-            find . -name "*.toml" -type f -exec sed -i '/^\[user_store\]/,/^base_dn =/c\[user_store]\ntype = "database_unique_id"\n#connection_url = "ldap://localhost:${Ports.EmbeddedLDAP.LDAPServerPort}"\n#connection_name = "uid=admin,ou=system"\n#connection_password = "admin"\n#base_dn = "dc=wso2,dc=org"' {} +
+            find . -name "*.toml" -type f -exec sed -i.bak '
+            /^\[user_store\]/,/^\[/ {
+                s/^type = "read_write_ldap_unique_id"$/type = "database_unique_id"/
+                s/^connection_url = "ldap:\/\/localhost:\${Ports\.EmbeddedLDAP\.LDAPServerPort}"$/#connection_url = "ldap:\/\/localhost:${Ports.EmbeddedLDAP.LDAPServerPort}"/
+                s/^connection_name = "uid=admin,ou=system"$/#connection_name = "uid=admin,ou=system"/
+                s/^connection_password = "admin"$/#connection_password = "admin"/
+                s/^base_dn = "dc=wso2,dc=org".*$/#&/
+            }
+            ' {} \;
+
+            find . -name "*.toml" -type f -exec sh -c 'echo "=== $1 ===" && grep -A 6 "^\[user_store\]" "$1" && echo ""' sh {} \;
         fi
     fi
     log_info "Running Maven clean install"
