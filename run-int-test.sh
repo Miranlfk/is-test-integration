@@ -204,6 +204,9 @@ if [[ "$PRODUCT_VERSION" != *"SNAPSHOT"* ]]; then
     log_info "Running Maven clean install"
     #For Tag-based execution we initially build the product pack and then run the integration tests
     echo $JAVA_HOME
+    if [[ "$PRODUCT_VERSION" == *"7.3.0"* ]]; then
+        export JAVA_HOME=/opt/${jdk_name}
+    fi
     mvn clean install -Dmaven.test.skip=true -U
     echo "Copying pack to target"
     mv $TESTGRID_DIR/$PRODUCT_NAME-$PRODUCT_VERSION.zip $PRODUCT_REPOSITORY_PACK_DIR/$PRODUCT_NAME-$PRODUCT_VERSION.zip
