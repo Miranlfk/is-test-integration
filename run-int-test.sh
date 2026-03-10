@@ -184,8 +184,8 @@ if [[ "$PRODUCT_VERSION" != *"SNAPSHOT"* ]]; then
     if [[ "$PRODUCT_REPOSITORY_BRANCH" == *"support"* ]]; then
         cp $TESTGRID_DIR/add-patch-repository.sh $TESTGRID_DIR/$PRODUCT_REPOSITORY_NAME
         log_info "Add WSO2 repository to pom.xml"
-        
-        bash $TESTGRID_DIR/$PRODUCT_REPOSITORY_NAME/add-patch-repository.sh
+        cd $TESTGRID_DIR/$PRODUCT_REPOSITORY_NAME/
+        bash add-patch-repository.sh
         if [[ "$PRODUCT_VERSION" == "5.11.0" ]]; then
             cd $TESTGRID_DIR/$PRODUCT_REPOSITORY_NAME
             find . -name "*.toml" -type f -exec sed -i.bak '
@@ -203,6 +203,7 @@ if [[ "$PRODUCT_VERSION" != *"SNAPSHOT"* ]]; then
     fi
     log_info "Running Maven clean install"
     #For Tag-based execution we initially build the product pack and then run the integration tests
+    cd $TESTGRID_DIR/$PRODUCT_REPOSITORY_NAME
     echo $JAVA_HOME
     if [[ "$PRODUCT_VERSION" == *"7.3.0"* ]]; then
         export JAVA_HOME=/opt/${jdk_name}
