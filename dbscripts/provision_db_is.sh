@@ -154,7 +154,7 @@ elif [[ $DB_ENGINE =~ 'oracle-se' ]]; then
     echo "CREATE USER WSO2IS_BPS_DB IDENTIFIED BY CF_DB_PASSWORD;"$'\n'"GRANT CONNECT, RESOURCE, DBA TO WSO2IS_BPS_DB;"$'\n'"GRANT UNLIMITED TABLESPACE TO WSO2IS_BPS_DB;" >> /opt/testgrid/workspace/$WSO2_PRODUCT_VERSION_SHORT/is_oracle.sql
     echo "CREATE USER WSO2IDENTITY_DB IDENTIFIED BY CF_DB_PASSWORD;"$'\n'"GRANT CONNECT, RESOURCE, DBA TO WSO2IDENTITY_DB;"$'\n'"GRANT UNLIMITED TABLESPACE TO WSO2IDENTITY_DB;" >> /opt/testgrid/workspace/$WSO2_PRODUCT_VERSION_SHORT/is_oracle.sql
     echo "CREATE USER WSO2CONSENT_DB IDENTIFIED BY CF_DB_PASSWORD;"$'\n'"GRANT CONNECT, RESOURCE, DBA TO WSO2CONSENT_DB;"$'\n'"GRANT UNLIMITED TABLESPACE TO WSO2CONSENT_DB;" >> /opt/testgrid/workspace/$WSO2_PRODUCT_VERSION_SHORT/is_oracle.sql
-    if [[ $WSO2_PRODUCT_VERSION = "5.9.0" || $WSO2_PRODUCT_VERSION = "5.10.0" || $WSO2_PRODUCT_VERSION = "5.11.0" || $WSO2_PRODUCT_VERSION = "7.0.0" ]]; then
+    if [[ $WSO2_PRODUCT_VERSION = "5.9.0" || $WSO2_PRODUCT_VERSION = "5.10.0" || $WSO2_PRODUCT_VERSION = "5.11.0" || $WSO2_PRODUCT_VERSION = "7.0.0" || $WSO2_PRODUCT_VERSION = "7.1.0-SNAPSHOT" || $WSO2_PRODUCT_VERSION = "7.1.0" || $WSO2_PRODUCT_VERSION = "7.2.0-SNAPSHOT" || $WSO2_PRODUCT_VERSION = "7.2.0" || $WSO2_PRODUCT_VERSION == *"7.2.1"* || $WSO2_PRODUCT_VERSION == *"7.3.0"* ]]; then
         echo "DECLARE USER_EXIST INTEGER;"$'\n'"BEGIN SELECT COUNT(*) INTO USER_EXIST FROM dba_users WHERE username='WSO2SHARED_DB';"$'\n'"IF (USER_EXIST > 0) THEN EXECUTE IMMEDIATE 'DROP USER WSO2IS_REG_DB CASCADE';"$'\n'"END IF;"$'\n'"END;"$'\n'"/" >> /opt/testgrid/workspace/$WSO2_PRODUCT_VERSION_SHORT/is_oracle.sql
         echo "CREATE USER WSO2SHARED_DB IDENTIFIED BY CF_DB_PASSWORD;"$'\n'"GRANT CONNECT, RESOURCE, DBA TO WSO2SHARED_DB;"$'\n'"GRANT UNLIMITED TABLESPACE TO WSO2SHARED_DB;" >> /opt/testgrid/workspace/$WSO2_PRODUCT_VERSION_SHORT/is_oracle.sql
     else
@@ -165,28 +165,25 @@ elif [[ $DB_ENGINE =~ 'oracle-se' ]]; then
     fi
     # Create the users
     # WARN: DO NOT RUN THE is_oracle.sql SCRIPT AFTER CREATING THE TABLES - SCHEMAS DROP WITH THE USERS
-    echo exit | sqlplus64 CF_DB_USERNAME/CF_DB_PASSWORD@//CF_DB_HOST:CF_DB_PORT/WSO2ISDB @/opt/testgrid/workspace/$WSO2_PRODUCT_VERSION_SHORT/is_oracle.sql
+    echo exit | sqlplus64 CF_DB_USERNAME/CF_DB_PASSWORD@//CF_DB_HOST:CF_DB_PORT/CF_DB_NAME @/opt/testgrid/workspace/$WSO2_PRODUCT_VERSION_SHORT/is_oracle.sql
     # Create the tables
     echo "--------------------BPS---------------------"
     if [[ $WSO2_PRODUCT_VERSION != "7.0.0" && $WSO2_PRODUCT_VERSION != "7.1.0-SNAPSHOT" && $WSO2_PRODUCT_VERSION != "7.1.0" && $WSO2_PRODUCT_VERSION != "7.2.0-SNAPSHOT" && $WSO2_PRODUCT_VERSION != "7.2.0" && $WSO2_PRODUCT_VERSION != *"7.2.1"* && $WSO2_PRODUCT_VERSION != *"7.3.0"* ]]; then
-    echo exit | sqlplus64 WSO2IS_BPS_DB/CF_DB_PASSWORD@//CF_DB_HOST:CF_DB_PORT/WSO2ISDB @/opt/testgrid/workspace/$WSO2_PRODUCT_VERSION_SHORT/is_oracle_bps.sql
+    echo exit | sqlplus64 WSO2IS_BPS_DB/CF_DB_PASSWORD@//CF_DB_HOST:CF_DB_PORT/CF_DB_NAME @/opt/testgrid/workspace/$WSO2_PRODUCT_VERSION_SHORT/is_oracle_bps.sql
     fi
     echo "--------------------IDENTITY---------------------"
-    echo exit | sqlplus64 WSO2IDENTITY_DB/CF_DB_PASSWORD@//CF_DB_HOST:CF_DB_PORT/WSO2ISDB @/opt/testgrid/workspace/$WSO2_PRODUCT_VERSION_SHORT/is_oracle_identity.sql
-    if [[ $WSO2_PRODUCT_VERSION = "5.10.0" || $WSO2_PRODUCT_VERSION = "5.11.0" || $WSO2_PRODUCT_VERSION = "7.0.0" || $WSO2_PRODUCT_VERSION != "7.1.0-SNAPSHOT" || $WSO2_PRODUCT_VERSION != "7.1.0" || $WSO2_PRODUCT_VERSION != "7.2.0-SNAPSHOT" || $WSO2_PRODUCT_VERSION != "7.2.0" || $WSO2_PRODUCT_VERSION != *"7.2.1"* || $WSO2_PRODUCT_VERSION != *"7.3.0"* ]]; then
+    echo exit | sqlplus64 WSO2IDENTITY_DB/CF_DB_PASSWORD@//CF_DB_HOST:CF_DB_PORT/CF_DB_NAME @/opt/testgrid/workspace/$WSO2_PRODUCT_VERSION_SHORT/is_oracle_identity.sql
+    if [[ $WSO2_PRODUCT_VERSION = "5.9.0" || $WSO2_PRODUCT_VERSION = "5.10.0" || $WSO2_PRODUCT_VERSION = "5.11.0" || $WSO2_PRODUCT_VERSION = "7.0.0" || $WSO2_PRODUCT_VERSION = "7.1.0-SNAPSHOT" || $WSO2_PRODUCT_VERSION = "7.1.0" || $WSO2_PRODUCT_VERSION = "7.2.0-SNAPSHOT" || $WSO2_PRODUCT_VERSION = "7.2.0" || $WSO2_PRODUCT_VERSION == *"7.2.1"* || $WSO2_PRODUCT_VERSION == *"7.3.0"* ]]; then
     echo "--------------------COMMON---------------------"
-        echo exit | sqlplus64 WSO2SHARED_DB/CF_DB_PASSWORD@//CF_DB_HOST:CF_DB_PORT/WSO2ISDB @/opt/testgrid/workspace/$WSO2_PRODUCT_VERSION_SHORT/is_oracle_common.sql
-    elif [[ $WSO2_PRODUCT_VERSION = "5.9.0" ]]; then
-    echo "--------------------COMMON---------------------"
-        echo exit | sqlplus64 WSO2SHARED_DB/CF_DB_PASSWORD@//CF_DB_HOST:CF_DB_PORT/WSO2ISDB @/opt/testgrid/workspace/$WSO2_PRODUCT_VERSION_SHORT/is_oracle_common.sql
+        echo exit | sqlplus64 WSO2SHARED_DB/CF_DB_PASSWORD@//CF_DB_HOST:CF_DB_PORT/CF_DB_NAME @/opt/testgrid/workspace/$WSO2_PRODUCT_VERSION_SHORT/is_oracle_common.sql
     else
-        echo exit | sqlplus64 WSO2IS_REG_DB/CF_DB_PASSWORD@//CF_DB_HOST:CF_DB_PORT/WSO2ISDB @/opt/testgrid/workspace/$WSO2_PRODUCT_VERSION_SHORT/is_oracle_common.sql
-        echo exit | sqlplus64 WSO2IS_USER_DB/CF_DB_PASSWORD@//CF_DB_HOST:CF_DB_PORT/WSO2ISDB @/opt/testgrid/workspace/$WSO2_PRODUCT_VERSION_SHORT/is_oracle_common.sql
+        echo exit | sqlplus64 WSO2IS_REG_DB/CF_DB_PASSWORD@//CF_DB_HOST:CF_DB_PORT/CF_DB_NAME @/opt/testgrid/workspace/$WSO2_PRODUCT_VERSION_SHORT/is_oracle_common.sql
+        echo exit | sqlplus64 WSO2IS_USER_DB/CF_DB_PASSWORD@//CF_DB_HOST:CF_DB_PORT/CF_DB_NAME @/opt/testgrid/workspace/$WSO2_PRODUCT_VERSION_SHORT/is_oracle_common.sql
     fi
     if $USE_CONSENT_DB; then
-        echo exit | sqlplus64 WSO2CONSENT_DB/CF_DB_PASSWORD@//CF_DB_HOST:CF_DB_PORT/WSO2ISDB @/opt/testgrid/workspace/$WSO2_PRODUCT_VERSION_SHORT/is_oracle_consent.sql
+        echo exit | sqlplus64 WSO2CONSENT_DB/CF_DB_PASSWORD@//CF_DB_HOST:CF_DB_PORT/CF_DB_NAME @/opt/testgrid/workspace/$WSO2_PRODUCT_VERSION_SHORT/is_oracle_consent.sql
     else
-        echo exit | sqlplus64 WSO2CONSENT_DB/CF_DB_PASSWORD@//CF_DB_HOST:CF_DB_PORT/WSO2ISDB @/opt/testgrid/workspace/$WSO2_PRODUCT_VERSION_SHORT/is_oracle_common.sql
+        echo exit | sqlplus64 WSO2CONSENT_DB/CF_DB_PASSWORD@//CF_DB_HOST:CF_DB_PORT/CF_DB_NAME @/opt/testgrid/workspace/$WSO2_PRODUCT_VERSION_SHORT/is_oracle_common.sql
     fi
 elif [[ $DB_ENGINE =~ 'sqlserver-se' ]]; then
     # DB Engine : SQLServer
