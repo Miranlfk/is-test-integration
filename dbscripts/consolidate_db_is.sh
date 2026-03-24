@@ -152,6 +152,20 @@ elif [ $DB_ENGINE = "sqlserver-se" ]; then
   echo "CREATE DATABASE WSO2_METRICS_DB;" >> "$db_create_file"
   echo "CREATE DATABASE WSO2AGENTIDENTITY_DB;" >> "$db_create_file"
   echo "GO" >> "$db_create_file"
+  echo "" >> "$db_create_file"
+  # Grant the login access to each created database
+  for db in WSO2SHARED_DB WSO2IS_BPS_DB WSO2IDENTITY_DB WSO2CONSENT_DB WSO2_METRICS_DB WSO2AGENTIDENTITY_DB; do
+    echo "USE $db;" >> "$db_create_file"
+    echo "GO" >> "$db_create_file"
+    echo "IF NOT EXISTS (SELECT name FROM sys.database_principals WHERE name = 'CF_DB_USERNAME')" >> "$db_create_file"
+    echo "BEGIN" >> "$db_create_file"
+    echo "    CREATE USER [CF_DB_USERNAME] FOR LOGIN [CF_DB_USERNAME];" >> "$db_create_file"
+    echo "END" >> "$db_create_file"
+    echo "GO" >> "$db_create_file"
+    echo "ALTER ROLE db_owner ADD MEMBER [CF_DB_USERNAME];" >> "$db_create_file"
+    echo "GO" >> "$db_create_file"
+    echo "" >> "$db_create_file"
+  done
   
   # Create schema scripts for each database
   sql_files=("$SCRIPT_LOCATION/mssql.sql" "$SCRIPT_LOCATION/identity/mssql.sql" "$SCRIPT_LOCATION/consent/mssql.sql" "$SCRIPT_LOCATION/identity/agent/mssql.sql")
