@@ -191,20 +191,20 @@ elif [[ $DB_ENGINE =~ 'sqlserver-se' ]]; then
     
     # Step 1: Create databases
     echo "Creating databases..."
-    sqlcmd -S CF_DB_HOST -U CF_DB_USERNAME -P CF_DB_PASSWORD -i /opt/testgrid/workspace/$WSO2_PRODUCT_VERSION_SHORT/is_mssql_db_create.sql
+    sqlcmd -S CF_DB_HOST -U CF_DB_USERNAME -P CF_DB_PASSWORD -C -i /opt/testgrid/workspace/$WSO2_PRODUCT_VERSION_SHORT/is_mssql_db_create.sql
     
     # Step 2: Populate each database with its schema (USE DATABASE statement included in schema files)
     echo "Populating WSO2SHARED_DB schema..."
-    sqlcmd -S CF_DB_HOST -U CF_DB_USERNAME -P CF_DB_PASSWORD -i /opt/testgrid/workspace/$WSO2_PRODUCT_VERSION_SHORT/is_mssql_shared.sql
+    sqlcmd -S CF_DB_HOST -U CF_DB_USERNAME -P CF_DB_PASSWORD -C -i /opt/testgrid/workspace/$WSO2_PRODUCT_VERSION_SHORT/is_mssql_shared.sql
     
     echo "Populating WSO2IDENTITY_DB schema..."
-    sqlcmd -S CF_DB_HOST -U CF_DB_USERNAME -P CF_DB_PASSWORD -i /opt/testgrid/workspace/$WSO2_PRODUCT_VERSION_SHORT/is_mssql_identity.sql
+    sqlcmd -S CF_DB_HOST -U CF_DB_USERNAME -P CF_DB_PASSWORD -C -i /opt/testgrid/workspace/$WSO2_PRODUCT_VERSION_SHORT/is_mssql_identity.sql
     
     echo "Populating WSO2CONSENT_DB schema..."
-    sqlcmd -S CF_DB_HOST -U CF_DB_USERNAME -P CF_DB_PASSWORD -i /opt/testgrid/workspace/$WSO2_PRODUCT_VERSION_SHORT/is_mssql_consent.sql
+    sqlcmd -S CF_DB_HOST -U CF_DB_USERNAME -P CF_DB_PASSWORD -C -i /opt/testgrid/workspace/$WSO2_PRODUCT_VERSION_SHORT/is_mssql_consent.sql
     
     echo "Populating WSO2AGENTIDENTITY_DB schema..."
-    sqlcmd -S CF_DB_HOST -U CF_DB_USERNAME -P CF_DB_PASSWORD -i /opt/testgrid/workspace/$WSO2_PRODUCT_VERSION_SHORT/is_mssql_agent_identity.sql
+    sqlcmd -S CF_DB_HOST -U CF_DB_USERNAME -P CF_DB_PASSWORD -C -i /opt/testgrid/workspace/$WSO2_PRODUCT_VERSION_SHORT/is_mssql_agent_identity.sql
 elif [[ $DB_ENGINE = "db2-se" ]]; then
     # DB Engine : DB2
     echo "DB2 DB Engine Selected! Running WSO2-IS $WSO2_PRODUCT_VERSION DB Scripts for DB2..."
