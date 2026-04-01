@@ -191,7 +191,7 @@ elif [ $DB_ENGINE = "sqlserver-se" ]; then
     echo "" >> "${output_files[$i]}"
   done
 
-elif [ $DB_ENGINE = "oracle-se" ]; then
+elif [[ $DB_ENGINE =~ 'oracle-se' ]]; then
   sql_files=("$SCRIPT_LOCATION/oracle.sql" "$SCRIPT_LOCATION/identity/oracle.sql" "$SCRIPT_LOCATION/consent/oracle.sql" "$SCRIPT_LOCATION/identity/agent/oracle.sql")
   databases=("WSO2SHARED_DB" "WSO2IDENTITY_DB" "WSO2CONSENT_DB" "WSO2AGENTIDENTITY_DB")
   output_files=("$WSO2_PRODUCT_VERSION_SHORT/is_oracle_common.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_oracle_identity.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_oracle_consent.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_oracle_agent_identity.sql")

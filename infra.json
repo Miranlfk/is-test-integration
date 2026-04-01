@@ -33,6 +33,10 @@
 			"file_name": "OpenJDK21U-jdk_x64_linux_hotspot_21.0.2_13"
 		},
 		{
+			"name": "ADOPT_OPEN_JDK25",
+			"file_name": "openjdk-25.0.2_linux-x64_bin"
+		},
+		{
 			"name": "ADOPT_OPEN_JDK11_ARM",
 			"file_name": "OpenJDK11U-jdk_aarch64_linux_11.0.7_10"
 		},
@@ -43,6 +47,10 @@
 		{
 			"name": "ADOPT_OPEN_JDK21_ARM",
 			"file_name": "OpenJDK21U-jdk_aarch64_linux_hotspot_21.0.2_13"
+		},
+		{
+			"name": "ADOPT_OPEN_JDK25_ARM",
+			"file_name": "openjdk-25.0.2_linux-aarch64_bin"
 		}
 	],
 	"jdbc": [
@@ -126,7 +134,7 @@
 		},
 		{
 			"name": "postgres",
-			"file_name": "postgresql-42.2.14",
+			"file_name": "postgresql-42.7.10",
 			"driver": "org.postgresql.Driver",
 			"database": [
 				{
