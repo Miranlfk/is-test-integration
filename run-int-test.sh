@@ -218,6 +218,9 @@ if [[ "$PRODUCT_VERSION" != *"SNAPSHOT"* ]]; then
     echo $JAVA_HOME
     mvn clean install
 else 
+    if [[ "$PRODUCT_VERSION" == *"7.3.0"* ]]; then
+        export JAVA_HOME=/opt/${jdk_name}
+    fi
     echo "Copying pack to target"
     mv $TESTGRID_DIR/$PRODUCT_NAME-$PRODUCT_VERSION.zip $PRODUCT_REPOSITORY_PACK_DIR/$PRODUCT_NAME-$PRODUCT_VERSION.zip
     ls $PRODUCT_REPOSITORY_PACK_DIR
