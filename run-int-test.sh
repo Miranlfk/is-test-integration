@@ -215,11 +215,14 @@ if [[ "$PRODUCT_VERSION" != *"SNAPSHOT"* ]]; then
     if ls $PRODUCT_REPOSITORY_PACK_DIR/*SNAPSHOT* 2>/dev/null; then
         find $PRODUCT_REPOSITORY_PACK_DIR -name "*SNAPSHOT*" -type f -delete
         log_info "SNAPSHOT packs removed from $PRODUCT_REPOSITORY_PACK_DIR"
+        echo "Copying pack to target"
+        PRODUCT_VERSION="7.3.0-rc1-SNAPSHOT"
+        mv $TESTGRID_DIR/$PRODUCT_NAME-$PRODUCT_VERSION.zip $PRODUCT_REPOSITORY_PACK_DIR/$PRODUCT_NAME-$PRODUCT_VERSION.zip
     else
         log_info "No SNAPSHOT packs found in $PRODUCT_REPOSITORY_PACK_DIR, skipping removal"
+        echo "Copying pack to target"
+        mv $TESTGRID_DIR/$PRODUCT_NAME-$PRODUCT_VERSION.zip $PRODUCT_REPOSITORY_PACK_DIR/$PRODUCT_NAME-$PRODUCT_VERSION.zip
     fi
-    echo "Copying pack to target"
-    mv $TESTGRID_DIR/$PRODUCT_NAME-$PRODUCT_VERSION.zip $PRODUCT_REPOSITORY_PACK_DIR/$PRODUCT_NAME-$PRODUCT_VERSION.zip
     ls $PRODUCT_REPOSITORY_PACK_DIR
     cd $INT_TEST_MODULE_DIR || log_error "Failed to navigate to integration test module directory"
     log_info "Running Maven clean install"
