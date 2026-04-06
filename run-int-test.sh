@@ -209,6 +209,15 @@ if [[ "$PRODUCT_VERSION" != *"SNAPSHOT"* ]]; then
         export JAVA_HOME=/opt/${jdk_name}
     fi
     mvn clean install -Dmaven.test.skip=true -U
+    ls $PRODUCT_REPOSITORY_PACK_DIR
+    # Remove any SNAPSHOT packs from the product repository pack directory
+    log_info "Removing any SNAPSHOT packs from $PRODUCT_REPOSITORY_PACK_DIR"
+    if ls $PRODUCT_REPOSITORY_PACK_DIR/*SNAPSHOT* 2>/dev/null; then
+        find $PRODUCT_REPOSITORY_PACK_DIR -name "*SNAPSHOT*" -type f -delete
+        log_info "SNAPSHOT packs removed from $PRODUCT_REPOSITORY_PACK_DIR"
+    else
+        log_info "No SNAPSHOT packs found in $PRODUCT_REPOSITORY_PACK_DIR, skipping removal"
+    fi
     echo "Copying pack to target"
     mv $TESTGRID_DIR/$PRODUCT_NAME-$PRODUCT_VERSION.zip $PRODUCT_REPOSITORY_PACK_DIR/$PRODUCT_NAME-$PRODUCT_VERSION.zip
     ls $PRODUCT_REPOSITORY_PACK_DIR
