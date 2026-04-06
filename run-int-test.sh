@@ -165,9 +165,9 @@ ls $TESTGRID_DIR
 
 # Update database configurations in deployment.toml before re-zipping
 log_info "Updating database configurations in deployment.toml"
-wget -q https://integration-testgrid-resources.s3.us-east-1.amazonaws.com/iam-support-scripts/update_db_configs.sh
-cp update_db_configs.sh $TESTGRID_DIR/
-bash $TESTGRID_DIR/update_db_configs.sh $DB_TYPE $PRODUCT_NAME-$PRODUCT_VERSION
+# wget -q https://integration-testgrid-resources.s3.us-east-1.amazonaws.com/iam-support-scripts/update_db_configs.sh
+# cp update_db_configs.sh $TESTGRID_DIR/
+# bash $TESTGRID_DIR/update_db_configs.sh $DB_TYPE $PRODUCT_NAME-$PRODUCT_VERSION
 
 # Re-zip the pack after configuration updates
 log_info "Re-zipping product pack with updated configurations"
@@ -217,7 +217,10 @@ if [[ "$PRODUCT_VERSION" != *"SNAPSHOT"* ]]; then
         log_info "SNAPSHOT packs removed from $PRODUCT_REPOSITORY_PACK_DIR"
         echo "Copying pack to target"
         PRODUCT_VERSION1="7.3.0-rc1-SNAPSHOT"
-        mv $TESTGRID_DIR/$PRODUCT_NAME-$PRODUCT_VERSION.zip $PRODUCT_REPOSITORY_PACK_DIR/$PRODUCT_NAME-$PRODUCT_VERSION1.zip
+        mv $TESTGRID_DIR/$PRODUCT_NAME-$PRODUCT_VERSION $TESTGRID_DIR/$PRODUCT_NAME-$PRODUCT_VERSION1
+        zip -q -r $TESTGRID_DIR/$PRODUCT_NAME-$PRODUCT_VERSION1.zip $TESTGRID_DIR/$PRODUCT_NAME-$PRODUCT_VERSION1
+        mv $TESTGRID_DIR/$PRODUCT_NAME-$PRODUCT_VERSION1.zip $PRODUCT_REPOSITORY_PACK_DIR/$PRODUCT_NAME-$PRODUCT_VERSION1.zip
+        
     else
         log_info "No SNAPSHOT packs found in $PRODUCT_REPOSITORY_PACK_DIR, skipping removal"
         echo "Copying pack to target"
