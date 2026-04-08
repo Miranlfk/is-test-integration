@@ -37,12 +37,12 @@ if [ $DB_ENGINE = "postgres" ]; then
   echo "DROP DATABASE IF EXISTS \"WSO2METRICS_DB\";" >> "$db_create_file"
   echo "DROP DATABASE IF EXISTS \"WSO2AGENTIDENTITY_DB\";" >> "$db_create_file"
   echo "" >> "$db_create_file"
-  echo "CREATE DATABASE \"WSO2SHARED_DB\";" >> "$db_create_file"
-  echo "CREATE DATABASE \"WSO2IS_BPS_DB\";" >> "$db_create_file"
-  echo "CREATE DATABASE \"WSO2IDENTITY_DB\";" >> "$db_create_file"
-  echo "CREATE DATABASE \"WSO2CONSENT_DB\";" >> "$db_create_file"
-  echo "CREATE DATABASE \"WSO2_METRICS_DB\";" >> "$db_create_file"
-  echo "CREATE DATABASE \"WSO2AGENTIDENTITY_DB\";" >> "$db_create_file"
+  echo "CREATE DATABASE \"WSO2SHARED_DB\" LC_COLLATE = 'C' LC_CTYPE = 'C' TEMPLATE = template0;" >> "$db_create_file"
+  echo "CREATE DATABASE \"WSO2IS_BPS_DB\" LC_COLLATE = 'C' LC_CTYPE = 'C' TEMPLATE = template0;" >> "$db_create_file"
+  echo "CREATE DATABASE \"WSO2IDENTITY_DB\" LC_COLLATE = 'C' LC_CTYPE = 'C' TEMPLATE = template0;" >> "$db_create_file"
+  echo "CREATE DATABASE \"WSO2CONSENT_DB\" LC_COLLATE = 'C' LC_CTYPE = 'C' TEMPLATE = template0;" >> "$db_create_file"
+  echo "CREATE DATABASE \"WSO2_METRICS_DB\" LC_COLLATE = 'C' LC_CTYPE = 'C' TEMPLATE = template0;" >> "$db_create_file"
+  echo "CREATE DATABASE \"WSO2AGENTIDENTITY_DB\" LC_COLLATE = 'C' LC_CTYPE = 'C' TEMPLATE = template0;" >> "$db_create_file"
   
   # Create schema scripts for each database
   sql_files=("$SCRIPT_LOCATION/postgresql.sql" "$SCRIPT_LOCATION/identity/postgresql.sql" "$SCRIPT_LOCATION/consent/postgresql.sql" "$SCRIPT_LOCATION/identity/agent/postgresql.sql")
