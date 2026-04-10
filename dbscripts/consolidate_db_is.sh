@@ -49,8 +49,7 @@ if [ $DB_ENGINE = "postgres" ]; then
   output_files=("$WSO2_PRODUCT_VERSION_SHORT/is_postgres_shared.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_postgres_identity.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_postgres_consent.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_postgres_agent_identity.sql")
   
   for i in "${!output_files[@]}"; do
-    touch "${output_files[$i]}"
-    cat "${sql_files[$i]}" >> "${output_files[$i]}"
+    cat "${sql_files[$i]}" > "${output_files[$i]}"
     echo "" >> "${output_files[$i]}"
   done
 
@@ -88,8 +87,7 @@ elif [ $DB_ENGINE = "mysql" ]; then
   output_files=("$WSO2_PRODUCT_VERSION_SHORT/is_mysql_shared.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_mysql_identity.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_mysql_consent.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_mysql_agent_identity.sql")
   
   for i in "${!output_files[@]}"; do
-    touch "${output_files[$i]}"
-    cat "${sql_files[$i]}" >> "${output_files[$i]}"
+    cat "${sql_files[$i]}" > "${output_files[$i]}"
     echo "" >> "${output_files[$i]}"
   done
 
@@ -127,8 +125,7 @@ elif [ $DB_ENGINE = "mariadb" ]; then
   output_files=("$WSO2_PRODUCT_VERSION_SHORT/is_mariadb_shared.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_mariadb_identity.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_mariadb_consent.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_mariadb_agent_identity.sql")
   
   for i in "${!output_files[@]}"; do
-    touch "${output_files[$i]}"
-    cat "${sql_files[$i]}" >> "${output_files[$i]}"
+    cat "${sql_files[$i]}" > "${output_files[$i]}"
     echo "" >> "${output_files[$i]}"
   done
 
@@ -172,19 +169,18 @@ elif [ $DB_ENGINE = "sqlserver-se" ]; then
   output_files=("$WSO2_PRODUCT_VERSION_SHORT/is_mssql_shared.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_mssql_identity.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_mssql_consent.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_mssql_agent_identity.sql")
   
   for i in "${!output_files[@]}"; do
-    touch "${output_files[$i]}"
-    # Add USE DATABASE statement for SQL Server
-    if [ $i -eq 0 ]; then
-      echo "USE WSO2SHARED_DB;" >> "${output_files[$i]}"
+    # Add USE DATABASE statement for SQL Server (use > to overwrite any existing file)
+    if [ "$i" -eq 0 ]; then
+      echo "USE WSO2SHARED_DB;" > "${output_files[$i]}"
       echo "GO" >> "${output_files[$i]}"
-    elif [ $i -eq 1 ]; then
-      echo "USE WSO2IDENTITY_DB;" >> "${output_files[$i]}"
+    elif [ "$i" -eq 1 ]; then
+      echo "USE WSO2IDENTITY_DB;" > "${output_files[$i]}"
       echo "GO" >> "${output_files[$i]}"
-    elif [ $i -eq 2 ]; then
-      echo "USE WSO2CONSENT_DB;" >> "${output_files[$i]}"
+    elif [ "$i" -eq 2 ]; then
+      echo "USE WSO2CONSENT_DB;" > "${output_files[$i]}"
       echo "GO" >> "${output_files[$i]}"
-    elif [ $i -eq 3 ]; then
-      echo "USE WSO2AGENTIDENTITY_DB;" >> "${output_files[$i]}"
+    elif [ "$i" -eq 3 ]; then
+      echo "USE WSO2AGENTIDENTITY_DB;" > "${output_files[$i]}"
       echo "GO" >> "${output_files[$i]}"
     fi
     cat "${sql_files[$i]}" >> "${output_files[$i]}"
@@ -196,13 +192,9 @@ elif [[ $DB_ENGINE =~ 'oracle-se' ]]; then
   databases=("WSO2SHARED_DB" "WSO2IDENTITY_DB" "WSO2CONSENT_DB" "WSO2AGENTIDENTITY_DB")
   output_files=("$WSO2_PRODUCT_VERSION_SHORT/is_oracle_common.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_oracle_identity.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_oracle_consent.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_oracle_agent_identity.sql")
   
-  # Ensure the output files exist (they will not be overwritten)
-  for output_file in "${output_files[@]}"; do
-    touch "$output_file"
-  done
-  # Loop through files and write content
+  # Loop through files and write content (use > to overwrite any existing file)
   for i in "${!sql_files[@]}"; do
-    cat "${sql_files[$i]}" >> "${output_files[$i]}"
+    cat "${sql_files[$i]}" > "${output_files[$i]}"
     echo "" >> "${output_files[$i]}"
   done
 
@@ -233,8 +225,7 @@ elif [ $DB_ENGINE = "db2-se" ]; then
   output_files=("$WSO2_PRODUCT_VERSION_SHORT/is_db2_shared.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_db2_identity.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_db2_consent.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_db2_agent_identity.sql")
   
   for i in "${!output_files[@]}"; do
-    touch "${output_files[$i]}"
-    cat "${sql_files[$i]}" >> "${output_files[$i]}"
+    cat "${sql_files[$i]}" > "${output_files[$i]}"
     echo "" >> "${output_files[$i]}"
   done
 fi
