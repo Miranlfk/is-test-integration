@@ -104,27 +104,97 @@ function set_jdk(){
     fi
 }
 
-function export_db_params(){
-    db_name=$1
+function get_db_type() {
+    local db_name=$1
+    case "$db_name" in
+        oracle-se2|oracle-se2-cdb) echo "oracle" ;;
+        postgres) echo "postgresql" ;;
+        sqlserver-se) echo "mssql" ;;
+        db2-se) echo "db2" ;;
+        *) echo "$db_name" ;;
+    esac
+}
 
-    export SHARED_DATABASE_DRIVER=$(jq -r '.jdbc[] | select ( .name == '\"${db_name}\"' ) | .driver' ${INFRA_JSON})
-    export SHARED_DATABASE_URL=$(jq -r '.jdbc[] | select ( .name == '\"${db_name}\"' ) | .database[] | select ( .name == "WSO2SHARED_DB") | .url' ${INFRA_JSON})
-    export SHARED_DATABASE_USERNAME=$(jq -r '.jdbc[] | select ( .name == '\"${db_name}\"' ) | .database[] | select ( .name == "WSO2SHARED_DB") | .username' ${INFRA_JSON})
-    export SHARED_DATABASE_PASSWORD=$(jq -r '.jdbc[] | select ( .name == '\"${db_name}\"' ) | .database[] | select ( .name == "WSO2SHARED_DB") | .password' ${INFRA_JSON})
-    export SHARED_DB_VALIDATION_QUERY=$(jq -r '.jdbc[] | select ( .name == '\"${db_name}\"' ) | .validation_query' ${INFRA_JSON})
-    
-    export IDENTITY_DATABASE_DRIVER=$(jq -r '.jdbc[] | select ( .name == '\"${db_name}\"' ) | .driver' ${INFRA_JSON})
-    export IDENTITY_DATABASE_URL=$(jq -r '.jdbc[] | select ( .name == '\"${db_name}\"' ) | .database[] | select ( .name == "WSO2IDENTITY_DB") | .url' ${INFRA_JSON})
-    export IDENTITY_DATABASE_USERNAME=$(jq -r '.jdbc[] | select ( .name == '\"${db_name}\"' ) | .database[] | select ( .name == "WSO2IDENTITY_DB") | .username' ${INFRA_JSON})
-    export IDENTITY_DATABASE_PASSWORD=$(jq -r '.jdbc[] | select ( .name == '\"${db_name}\"' ) | .database[] | select ( .name == "WSO2IDENTITY_DB") | .password' ${INFRA_JSON})
-    export IDENTITY_DB_VALIDATION_QUERY=$(jq -r '.jdbc[] | select ( .name == '\"${db_name}\"' ) | .validation_query' ${INFRA_JSON})
+function update_test_pom_db_config() {
+    local db_name=$1
+    local pom_file="$INT_TEST_MODULE_DIR/tests-backend/pom.xml"
 
-    export AGENTIDENTITY_DB_DRIVER=$(jq -r '.jdbc[] | select ( .name == '\"${db_name}\"' ) | .driver' ${INFRA_JSON})
-    export AGENTIDENTITY_DB_URL=$(jq -r '.jdbc[] | select ( .name == '\"${db_name}\"' ) | .database[] | select ( .name == "WSO2AGENTIDENTITY_DB") | .url' ${INFRA_JSON})
-    export AGENTIDENTITY_DB_USERNAME=$(jq -r '.jdbc[] | select ( .name == '\"${db_name}\"' ) | .database[] | select ( .name == "WSO2AGENTIDENTITY_DB") | .username' ${INFRA_JSON})
-    export AGENTIDENTITY_DB_PASSWORD=$(jq -r '.jdbc[] | select ( .name == '\"${db_name}\"' ) | .database[] | select ( .name == "WSO2AGENTIDENTITY_DB") | .password' ${INFRA_JSON})
-    export AGENTIDENTITY_DB_VALIDATION_QUERY=$(jq -r '.jdbc[] | select ( .name == '\"${db_name}\"' ) | .validation_query' ${INFRA_JSON})
-    
+    local db_type driver validation_query
+    local identity_url identity_username identity_password
+    local shared_url shared_username shared_password
+    local agentidentity_url agentidentity_username agentidentity_password
+
+    db_type=$(get_db_type "$db_name")
+    driver=$(jq -r --arg db "$db_name" '.jdbc[] | select(.name == $db) | .driver' "${INFRA_JSON}")
+    validation_query=$(jq -r --arg db "$db_name" '.jdbc[] | select(.name == $db) | .validation_query' "${INFRA_JSON}")
+
+    identity_url=$(jq -r --arg db "$db_name" '.jdbc[] | select(.name == $db) | .database[] | select(.name == "WSO2IDENTITY_DB") | .url' "${INFRA_JSON}")
+    identity_username=$(jq -r --arg db "$db_name" '.jdbc[] | select(.name == $db) | .database[] | select(.name == "WSO2IDENTITY_DB") | .username' "${INFRA_JSON}")
+    identity_password=$(jq -r --arg db "$db_name" '.jdbc[] | select(.name == $db) | .database[] | select(.name == "WSO2IDENTITY_DB") | .password' "${INFRA_JSON}")
+
+    shared_url=$(jq -r --arg db "$db_name" '.jdbc[] | select(.name == $db) | .database[] | select(.name == "WSO2SHARED_DB") | .url' "${INFRA_JSON}")
+    shared_username=$(jq -r --arg db "$db_name" '.jdbc[] | select(.name == $db) | .database[] | select(.name == "WSO2SHARED_DB") | .username' "${INFRA_JSON}")
+    shared_password=$(jq -r --arg db "$db_name" '.jdbc[] | select(.name == $db) | .database[] | select(.name == "WSO2SHARED_DB") | .password' "${INFRA_JSON}")
+
+    agentidentity_url=$(jq -r --arg db "$db_name" '.jdbc[] | select(.name == $db) | .database[] | select(.name == "WSO2AGENTIDENTITY_DB") | .url' "${INFRA_JSON}")
+    agentidentity_username=$(jq -r --arg db "$db_name" '.jdbc[] | select(.name == $db) | .database[] | select(.name == "WSO2AGENTIDENTITY_DB") | .username' "${INFRA_JSON}")
+    agentidentity_password=$(jq -r --arg db "$db_name" '.jdbc[] | select(.name == $db) | .database[] | select(.name == "WSO2AGENTIDENTITY_DB") | .password' "${INFRA_JSON}")
+
+    log_info "Injecting test-backend/pom.xml environment variables for ${db_name} (type: ${db_type})"
+
+    # Write the <environmentVariables> block to a temp file, then inject it into
+    # the testgrid profile of pom.xml (between </systemProperties> and <workingDirectory>)
+    local tmp_env_vars
+    tmp_env_vars=$(mktemp)
+    cat > "$tmp_env_vars" << XML
+                            <environmentVariables>
+                                <IDENTITY_DATABASE_TYPE>${db_type}</IDENTITY_DATABASE_TYPE>
+                                <IDENTITY_DATABASE_DRIVER>${driver}</IDENTITY_DATABASE_DRIVER>
+                                <IDENTITY_DATABASE_URL>${identity_url}</IDENTITY_DATABASE_URL>
+                                <IDENTITY_DATABASE_USERNAME>${identity_username}</IDENTITY_DATABASE_USERNAME>
+                                <IDENTITY_DATABASE_PASSWORD>${identity_password}</IDENTITY_DATABASE_PASSWORD>
+                                <IDENTITY_DATABASE_VALIDATION_QUERY>${validation_query}</IDENTITY_DATABASE_VALIDATION_QUERY>
+                                <SHARED_DATABASE_TYPE>${db_type}</SHARED_DATABASE_TYPE>
+                                <SHARED_DATABASE_DRIVER>${driver}</SHARED_DATABASE_DRIVER>
+                                <SHARED_DATABASE_URL>${shared_url}</SHARED_DATABASE_URL>
+                                <SHARED_DATABASE_USERNAME>${shared_username}</SHARED_DATABASE_USERNAME>
+                                <SHARED_DATABASE_PASSWORD>${shared_password}</SHARED_DATABASE_PASSWORD>
+                                <SHARED_DATABASE_VALIDATION_QUERY>${validation_query}</SHARED_DATABASE_VALIDATION_QUERY>
+                                <AGENTIDENTITY_DATABASE_TYPE>${db_type}</AGENTIDENTITY_DATABASE_TYPE>
+                                <AGENTIDENTITY_DATABASE_DRIVER>${driver}</AGENTIDENTITY_DATABASE_DRIVER>
+                                <AGENTIDENTITY_DATABASE_URL>${agentidentity_url}</AGENTIDENTITY_DATABASE_URL>
+                                <AGENTIDENTITY_DATABASE_USERNAME>${agentidentity_username}</AGENTIDENTITY_DATABASE_USERNAME>
+                                <AGENTIDENTITY_DATABASE_PASSWORD>${agentidentity_password}</AGENTIDENTITY_DATABASE_PASSWORD>
+                                <AGENTIDENTITY_DATABASE_VALIDATION_QUERY>${validation_query}</AGENTIDENTITY_DATABASE_VALIDATION_QUERY>
+                            </environmentVariables>
+XML
+
+    python3 - "$pom_file" "$tmp_env_vars" << 'PYEOF'
+import re, sys
+
+pom_file = sys.argv[1]
+env_vars_file = sys.argv[2]
+
+with open(env_vars_file, 'r') as f:
+    env_block = f.read().rstrip('\n')
+
+with open(pom_file, 'r') as f:
+    content = f.read()
+
+# Insert <environmentVariables> into the testgrid profile between </systemProperties> and <workingDirectory>
+pattern = r'(<id>testgrid</id>.*?</systemProperties>)(\s*<workingDirectory>)'
+replacement = r'\1\n' + env_block + r'\2'
+new_content = re.sub(pattern, replacement, content, flags=re.DOTALL)
+
+if new_content == content:
+    print('ERROR: Could not inject environment variables into testgrid profile', file=sys.stderr)
+    sys.exit(1)
+
+with open(pom_file, 'w') as f:
+    f.write(new_content)
+PYEOF
+
+    rm -f "$tmp_env_vars"
 }
 
 source /etc/environment
@@ -150,7 +220,7 @@ sed -i "s|DB_USERNAME|${CF_DB_USERNAME}|g" ${INFRA_JSON}
 sed -i "s|DB_PASSWORD|${CF_DB_PASSWORD}|g" ${INFRA_JSON}
 sed -i "s|DB_NAME|${DB_NAME}|g" ${INFRA_JSON}
 
-export_db_params ${DB_TYPE}
+update_test_pom_db_config "${DB_TYPE}"
 
 # mkdir -p $M2_REPO_DIR
 # export MAVEN_OPTS="-Dmaven.repo.local=$M2_REPO_DIR"
@@ -163,8 +233,8 @@ ls $TESTGRID_DIR
 rm -rf $TESTGRID_DIR/$PRODUCT_NAME-$PRODUCT_VERSION.zip
 ls $TESTGRID_DIR
 
-# Update database configurations in deployment.toml before re-zipping
-log_info "Updating database configurations in deployment.toml"
+# Update deployment.toml in the pack with $env{} placeholders for database configuration
+log_info "Updating deployment.toml with environment variable placeholders"
 wget -q https://integration-testgrid-resources.s3.us-east-1.amazonaws.com/iam-support-scripts/update_db_configs.sh
 cp update_db_configs.sh $TESTGRID_DIR/
 bash $TESTGRID_DIR/update_db_configs.sh $DB_TYPE $PRODUCT_NAME-$PRODUCT_VERSION
