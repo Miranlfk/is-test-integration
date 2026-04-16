@@ -170,17 +170,22 @@ function update_test_pom_db_config() {
 XML
 
     awk -v env_file="$tmp_env_vars" '
-        BEGIN { in_testgrid = 0; injected = 0 }
-        /<id>integration<\/id>/ { in_testgrid = 1 }
-        /<\/systemProperties>/ && in_testgrid && !injected {
-            print
+        BEGIN { in_integration = 0; in_env_vars = 0; injected = 0 }
+        /<id>integration<\/id>/ { in_integration = 1 }
+        /<environmentVariables>/ && in_integration {
+            in_env_vars = 1
             while ((getline line < env_file) > 0) print line
             injected = 1
-            in_testgrid = 0
             next
         }
+        /<\/environmentVariables>/ && in_env_vars {
+            in_env_vars = 0
+            in_integration = 0
+            next
+        }
+        in_env_vars { next }
         { print }
-        END { if (!injected) { print "ERROR: Could not inject environment variables into testgrid profile" > "/dev/stderr"; exit 1 } }
+        END { if (!injected) { print "ERROR: Could not replace environment variables in integration profile" > "/dev/stderr"; exit 1 } }
     ' "$pom_file" > "${pom_file}.tmp"
     awk_status=$?
     if [ $awk_status -ne 0 ] || ! mv "${pom_file}.tmp" "$pom_file"; then
