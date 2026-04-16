@@ -169,30 +169,24 @@ function update_test_pom_db_config() {
                             </environmentVariables>
 XML
 
-    python3 - "$pom_file" "$tmp_env_vars" << 'PYEOF'
-import re, sys
-
-pom_file = sys.argv[1]
-env_vars_file = sys.argv[2]
-
-with open(env_vars_file, 'r') as f:
-    env_block = f.read().rstrip('\n')
-
-with open(pom_file, 'r') as f:
-    content = f.read()
-
-# Insert <environmentVariables> into the testgrid profile between </systemProperties> and <workingDirectory>
-pattern = r'(<id>testgrid</id>.*?</systemProperties>)(\s*<workingDirectory>)'
-replacement = r'\1\n' + env_block + r'\2'
-new_content = re.sub(pattern, replacement, content, flags=re.DOTALL)
-
-if new_content == content:
-    print('ERROR: Could not inject environment variables into testgrid profile', file=sys.stderr)
-    sys.exit(1)
-
-with open(pom_file, 'w') as f:
-    f.write(new_content)
-PYEOF
+    awk -v env_file="$tmp_env_vars" '
+        BEGIN { in_testgrid = 0; injected = 0 }
+        /<id>integration<\/id>/ { in_testgrid = 1 }
+        /<\/systemProperties>/ && in_testgrid && !injected {
+            print
+            while ((getline line < env_file) > 0) print line
+            injected = 1
+            in_testgrid = 0
+            next
+        }
+        { print }
+        END { if (!injected) { print "ERROR: Could not inject environment variables into testgrid profile" > "/dev/stderr"; exit 1 } }
+    ' "$pom_file" > "${pom_file}.tmp"
+    awk_status=$?
+    if [ $awk_status -ne 0 ] || ! mv "${pom_file}.tmp" "$pom_file"; then
+        rm -f "${pom_file}.tmp"
+        log_error "Failed to inject environment variables into testgrid profile"
+    fi
 
     rm -f "$tmp_env_vars"
 }
