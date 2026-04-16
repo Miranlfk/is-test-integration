@@ -44,14 +44,18 @@ if [ $DB_ENGINE = "postgres" ]; then
   echo "CREATE DATABASE \"WSO2_METRICS_DB\" LC_COLLATE = 'C' LC_CTYPE = 'C' TEMPLATE = template0;" >> "$db_create_file"
   echo "CREATE DATABASE \"WSO2AGENTIDENTITY_DB\" LC_COLLATE = 'C' LC_CTYPE = 'C' TEMPLATE = template0;" >> "$db_create_file"
   
-  # Create schema scripts for each database
-  sql_files=("$SCRIPT_LOCATION/postgresql.sql" "$SCRIPT_LOCATION/identity/postgresql.sql" "$SCRIPT_LOCATION/consent/postgresql.sql" "$SCRIPT_LOCATION/identity/agent/postgresql.sql")
-  output_files=("$WSO2_PRODUCT_VERSION_SHORT/is_postgres_shared.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_postgres_identity.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_postgres_consent.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_postgres_agent_identity.sql")
-  
+  # Create schema scripts for each database (consent is merged into identity)
+  sql_files=("$SCRIPT_LOCATION/postgresql.sql" "$SCRIPT_LOCATION/identity/postgresql.sql" "$SCRIPT_LOCATION/identity/agent/postgresql.sql")
+  output_files=("$WSO2_PRODUCT_VERSION_SHORT/is_postgres_shared.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_postgres_identity.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_postgres_agent_identity.sql")
+
   for i in "${!output_files[@]}"; do
     cat "${sql_files[$i]}" > "${output_files[$i]}"
     echo "" >> "${output_files[$i]}"
   done
+
+  # Append consent schema into the identity SQL file
+  cat "$SCRIPT_LOCATION/consent/postgresql.sql" >> "$WSO2_PRODUCT_VERSION_SHORT/is_postgres_identity.sql"
+  echo "" >> "$WSO2_PRODUCT_VERSION_SHORT/is_postgres_identity.sql"
 
 elif [ $DB_ENGINE = "mysql" ]; then
   # Create database creation script
@@ -82,14 +86,18 @@ elif [ $DB_ENGINE = "mysql" ]; then
   echo "CREATE DATABASE WSO2_STATUS_DASHBOARD_DB character set latin1;" >> "$db_create_file"
   echo "CREATE DATABASE WSO2AGENTIDENTITY_DB character set latin1;" >> "$db_create_file"
   
-  # Create schema scripts for each database
-  sql_files=("$SCRIPT_LOCATION/mysql.sql" "$SCRIPT_LOCATION/identity/mysql.sql" "$SCRIPT_LOCATION/consent/mysql.sql" "$SCRIPT_LOCATION/identity/agent/mysql.sql")
-  output_files=("$WSO2_PRODUCT_VERSION_SHORT/is_mysql_shared.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_mysql_identity.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_mysql_consent.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_mysql_agent_identity.sql")
-  
+  # Create schema scripts for each database (consent is merged into identity)
+  sql_files=("$SCRIPT_LOCATION/mysql.sql" "$SCRIPT_LOCATION/identity/mysql.sql" "$SCRIPT_LOCATION/identity/agent/mysql.sql")
+  output_files=("$WSO2_PRODUCT_VERSION_SHORT/is_mysql_shared.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_mysql_identity.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_mysql_agent_identity.sql")
+
   for i in "${!output_files[@]}"; do
     cat "${sql_files[$i]}" > "${output_files[$i]}"
     echo "" >> "${output_files[$i]}"
   done
+
+  # Append consent schema into the identity SQL file
+  cat "$SCRIPT_LOCATION/consent/mysql.sql" >> "$WSO2_PRODUCT_VERSION_SHORT/is_mysql_identity.sql"
+  echo "" >> "$WSO2_PRODUCT_VERSION_SHORT/is_mysql_identity.sql"
 
 elif [ $DB_ENGINE = "mariadb" ]; then
   # Create database creation script
@@ -120,14 +128,18 @@ elif [ $DB_ENGINE = "mariadb" ]; then
   echo "CREATE DATABASE WSO2_STATUS_DASHBOARD_DB character set latin1;" >> "$db_create_file"
   echo "CREATE DATABASE WSO2AGENTIDENTITY_DB character set latin1;" >> "$db_create_file"
   
-  # Create schema scripts for each database
-  sql_files=("$SCRIPT_LOCATION/mysql.sql" "$SCRIPT_LOCATION/identity/mysql.sql" "$SCRIPT_LOCATION/consent/mysql.sql" "$SCRIPT_LOCATION/identity/agent/mysql.sql")
-  output_files=("$WSO2_PRODUCT_VERSION_SHORT/is_mariadb_shared.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_mariadb_identity.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_mariadb_consent.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_mariadb_agent_identity.sql")
-  
+  # Create schema scripts for each database (consent is merged into identity)
+  sql_files=("$SCRIPT_LOCATION/mysql.sql" "$SCRIPT_LOCATION/identity/mysql.sql" "$SCRIPT_LOCATION/identity/agent/mysql.sql")
+  output_files=("$WSO2_PRODUCT_VERSION_SHORT/is_mariadb_shared.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_mariadb_identity.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_mariadb_agent_identity.sql")
+
   for i in "${!output_files[@]}"; do
     cat "${sql_files[$i]}" > "${output_files[$i]}"
     echo "" >> "${output_files[$i]}"
   done
+
+  # Append consent schema into the identity SQL file
+  cat "$SCRIPT_LOCATION/consent/mysql.sql" >> "$WSO2_PRODUCT_VERSION_SHORT/is_mariadb_identity.sql"
+  echo "" >> "$WSO2_PRODUCT_VERSION_SHORT/is_mariadb_identity.sql"
 
 elif [ $DB_ENGINE = "sqlserver-se" ]; then
   # Create database creation script
@@ -164,10 +176,10 @@ elif [ $DB_ENGINE = "sqlserver-se" ]; then
     echo "" >> "$db_create_file"
   done
   
-  # Create schema scripts for each database
-  sql_files=("$SCRIPT_LOCATION/mssql.sql" "$SCRIPT_LOCATION/identity/mssql.sql" "$SCRIPT_LOCATION/consent/mssql.sql" "$SCRIPT_LOCATION/identity/agent/mssql.sql")
-  output_files=("$WSO2_PRODUCT_VERSION_SHORT/is_mssql_shared.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_mssql_identity.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_mssql_consent.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_mssql_agent_identity.sql")
-  
+  # Create schema scripts for each database (consent is merged into identity)
+  sql_files=("$SCRIPT_LOCATION/mssql.sql" "$SCRIPT_LOCATION/identity/mssql.sql" "$SCRIPT_LOCATION/identity/agent/mssql.sql")
+  output_files=("$WSO2_PRODUCT_VERSION_SHORT/is_mssql_shared.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_mssql_identity.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_mssql_agent_identity.sql")
+
   for i in "${!output_files[@]}"; do
     # Add USE DATABASE statement for SQL Server (use > to overwrite any existing file)
     if [ "$i" -eq 0 ]; then
@@ -177,9 +189,6 @@ elif [ $DB_ENGINE = "sqlserver-se" ]; then
       echo "USE WSO2IDENTITY_DB;" > "${output_files[$i]}"
       echo "GO" >> "${output_files[$i]}"
     elif [ "$i" -eq 2 ]; then
-      echo "USE WSO2CONSENT_DB;" > "${output_files[$i]}"
-      echo "GO" >> "${output_files[$i]}"
-    elif [ "$i" -eq 3 ]; then
       echo "USE WSO2AGENTIDENTITY_DB;" > "${output_files[$i]}"
       echo "GO" >> "${output_files[$i]}"
     fi
@@ -187,16 +196,24 @@ elif [ $DB_ENGINE = "sqlserver-se" ]; then
     echo "" >> "${output_files[$i]}"
   done
 
+  # Append consent schema into the identity SQL file (no USE change — stays in WSO2IDENTITY_DB context)
+  cat "$SCRIPT_LOCATION/consent/mssql.sql" >> "$WSO2_PRODUCT_VERSION_SHORT/is_mssql_identity.sql"
+  echo "" >> "$WSO2_PRODUCT_VERSION_SHORT/is_mssql_identity.sql"
+
 elif [[ $DB_ENGINE =~ 'oracle-se' ]]; then
-  sql_files=("$SCRIPT_LOCATION/oracle.sql" "$SCRIPT_LOCATION/identity/oracle.sql" "$SCRIPT_LOCATION/consent/oracle.sql" "$SCRIPT_LOCATION/identity/agent/oracle.sql")
-  databases=("WSO2SHARED_DB" "WSO2IDENTITY_DB" "WSO2CONSENT_DB" "WSO2AGENTIDENTITY_DB")
-  output_files=("$WSO2_PRODUCT_VERSION_SHORT/is_oracle_common.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_oracle_identity.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_oracle_consent.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_oracle_agent_identity.sql")
-  
+  # Create schema scripts for each database (consent is merged into identity)
+  sql_files=("$SCRIPT_LOCATION/oracle.sql" "$SCRIPT_LOCATION/identity/oracle.sql" "$SCRIPT_LOCATION/identity/agent/oracle.sql")
+  output_files=("$WSO2_PRODUCT_VERSION_SHORT/is_oracle_common.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_oracle_identity.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_oracle_agent_identity.sql")
+
   # Loop through files and write content (use > to overwrite any existing file)
   for i in "${!sql_files[@]}"; do
     cat "${sql_files[$i]}" > "${output_files[$i]}"
     echo "" >> "${output_files[$i]}"
   done
+
+  # Append consent schema into the identity SQL file
+  cat "$SCRIPT_LOCATION/consent/oracle.sql" >> "$WSO2_PRODUCT_VERSION_SHORT/is_oracle_identity.sql"
+  echo "" >> "$WSO2_PRODUCT_VERSION_SHORT/is_oracle_identity.sql"
 
 elif [ $DB_ENGINE = "db2-se" ]; then
   # Create database creation script
@@ -220,14 +237,18 @@ elif [ $DB_ENGINE = "db2-se" ]; then
   echo "CREATE DATABASE WSO2_METRICS_DB;" >> "$db_create_file"
   echo "CREATE DATABASE WSO2AGENTIDENTITY_DB;" >> "$db_create_file"
   
-  # Create schema scripts for each database
-  sql_files=("$SCRIPT_LOCATION/db2.sql" "$SCRIPT_LOCATION/identity/db2.sql" "$SCRIPT_LOCATION/consent/db2.sql" "$SCRIPT_LOCATION/identity/agent/db2.sql")
-  output_files=("$WSO2_PRODUCT_VERSION_SHORT/is_db2_shared.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_db2_identity.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_db2_consent.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_db2_agent_identity.sql")
-  
+  # Create schema scripts for each database (consent is merged into identity)
+  sql_files=("$SCRIPT_LOCATION/db2.sql" "$SCRIPT_LOCATION/identity/db2.sql" "$SCRIPT_LOCATION/identity/agent/db2.sql")
+  output_files=("$WSO2_PRODUCT_VERSION_SHORT/is_db2_shared.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_db2_identity.sql" "$WSO2_PRODUCT_VERSION_SHORT/is_db2_agent_identity.sql")
+
   for i in "${!output_files[@]}"; do
     cat "${sql_files[$i]}" > "${output_files[$i]}"
     echo "" >> "${output_files[$i]}"
   done
+
+  # Append consent schema into the identity SQL file
+  cat "$SCRIPT_LOCATION/consent/db2.sql" >> "$WSO2_PRODUCT_VERSION_SHORT/is_db2_identity.sql"
+  echo "" >> "$WSO2_PRODUCT_VERSION_SHORT/is_db2_identity.sql"
 fi
 
 echo "SQL files appended successfully"

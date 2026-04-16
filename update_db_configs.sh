@@ -58,38 +58,13 @@ if [ -z "$DB_EXISTS" ]; then
     exit 1
 fi
 
-# Extract database configuration from infra.json
-DRIVER=$(jq -r --arg db "$DB_TYPE" '.jdbc[] | select(.name == $db) | .driver' "$INFRA_JSON")
-VALIDATION_QUERY=$(jq -r --arg db "$DB_TYPE" '.jdbc[] | select(.name == $db) | .validation_query' "$INFRA_JSON")
-
 echo "Updating $DEPLOYMENT_TOML with $DB_TYPE database configuration..."
 
 # Create a backup
 cp "$DEPLOYMENT_TOML" "$BACKUP_TOML"
 
-# Extract database info from infra.json
-IDENTITY_DB=$(jq -r --arg db "$DB_TYPE" '.jdbc[] | select(.name == $db) | .database[] | select(.name == "WSO2IDENTITY_DB")' "$INFRA_JSON")
-SHARED_DB=$(jq -r --arg db "$DB_TYPE" '.jdbc[] | select(.name == $db) | .database[] | select(.name == "WSO2SHARED_DB")' "$INFRA_JSON")
-AGENTIDENTITY_DB=$(jq -r --arg db "$DB_TYPE" '.jdbc[] | select(.name == $db) | .database[] | select(.name == "WSO2AGENTIDENTITY_DB")' "$INFRA_JSON")
-
-# Extract values for identity_db
-IDENTITY_URL=$(echo "$IDENTITY_DB" | jq -r '.url')
-IDENTITY_USERNAME=$(echo "$IDENTITY_DB" | jq -r '.username')
-IDENTITY_PASSWORD=$(echo "$IDENTITY_DB" | jq -r '.password')
-
-# Extract values for shared_db
-SHARED_URL=$(echo "$SHARED_DB" | jq -r '.url')
-SHARED_USERNAME=$(echo "$SHARED_DB" | jq -r '.username')
-SHARED_PASSWORD=$(echo "$SHARED_DB" | jq -r '.password')
-
-AGENTIDENTITY_URL=$(echo "$AGENTIDENTITY_DB" | jq -r '.url')
-AGENTIDENTITY_USERNAME=$(echo "$AGENTIDENTITY_DB" | jq -r '.username')
-AGENTIDENTITY_PASSWORD=$(echo "$AGENTIDENTITY_DB" | jq -r '.password')
-
-# For oracle, we'll use oracle-se2 even though we map it to "oracle" for display
-if [ "$DB_TYPE_INPUT" = "oracle-se2" ] || [ "$DB_TYPE_INPUT" = "oracle-se2-cdb" ]; then
-    DB_TYPE="oracle"
-fi
+# Extract AgentIdentity URL to check if it is configured in infra.json
+AGENTIDENTITY_URL=$(jq -r --arg db "$DB_TYPE" '.jdbc[] | select(.name == $db) | .database[] | select(.name == "WSO2AGENTIDENTITY_DB") | .url' "$INFRA_JSON")
 
 # Create new content
 {
@@ -98,12 +73,12 @@ fi
     if [[ "$line" =~ ^\[database.identity_db\] ]]; then
       # Write the identity_db section
       echo "[database.identity_db]"
-      echo "type = \"$DB_TYPE\""
-      echo "url = \"$IDENTITY_URL\""
-      echo "username = \"$IDENTITY_USERNAME\""
-      echo "password = \"$IDENTITY_PASSWORD\""
-      echo "driver = \"$DRIVER\""
-      echo "validationQuery = \"$VALIDATION_QUERY\""
+      echo "type = \"\$env{IDENTITY_DATABASE_TYPE}\""
+      echo "url = \"\$env{IDENTITY_DATABASE_URL}\""
+      echo "username = \"\$env{IDENTITY_DATABASE_USERNAME}\""
+      echo "password = \"\$env{IDENTITY_DATABASE_PASSWORD}\""
+      echo "driver = \"\$env{IDENTITY_DATABASE_DRIVER}\""
+      echo "validationQuery = \"\$env{IDENTITY_DATABASE_VALIDATION_QUERY}\""
       echo ""
       
       # Skip the original section
@@ -113,12 +88,12 @@ fi
           if [[ "$section_line" =~ ^\[database.shared_db\] ]]; then
             # Write shared_db section
             echo "[database.shared_db]"
-            echo "type = \"$DB_TYPE\""
-            echo "url = \"$SHARED_URL\""
-            echo "username = \"$SHARED_USERNAME\""
-            echo "password = \"$SHARED_PASSWORD\""
-            echo "driver = \"$DRIVER\""
-            echo "validationQuery = \"$VALIDATION_QUERY\""
+            echo "type = \"\$env{SHARED_DATABASE_TYPE}\""
+            echo "url = \"\$env{SHARED_DATABASE_URL}\""
+            echo "username = \"\$env{SHARED_DATABASE_USERNAME}\""
+            echo "password = \"\$env{SHARED_DATABASE_PASSWORD}\""
+            echo "driver = \"\$env{SHARED_DATABASE_DRIVER}\""
+            echo "validationQuery = \"\$env{SHARED_DATABASE_VALIDATION_QUERY}\""
             echo ""
             
             # Skip the original shared_db section
@@ -130,12 +105,12 @@ fi
                   if [ -n "$AGENTIDENTITY_URL" ] && [ "$AGENTIDENTITY_URL" != "null" ]; then
                     echo "[datasource.AgentIdentity]"
                     echo "id = \"AgentIdentity\""
-                    echo "type = \"$DB_TYPE\""
-                    echo "url = \"$AGENTIDENTITY_URL\""
-                    echo "username = \"$AGENTIDENTITY_USERNAME\""
-                    echo "password = \"$AGENTIDENTITY_PASSWORD\""
-                    echo "driver = \"$DRIVER\""
-                    echo "validationQuery = \"$VALIDATION_QUERY\""
+                    echo "type = \"\$env{AGENTIDENTITY_DATABASE_TYPE}\""
+                    echo "url = \"\$env{AGENTIDENTITY_DATABASE_URL}\""
+                    echo "username = \"\$env{AGENTIDENTITY_DATABASE_USERNAME}\""
+                    echo "password = \"\$env{AGENTIDENTITY_DATABASE_PASSWORD}\""
+                    echo "driver = \"\$env{AGENTIDENTITY_DATABASE_DRIVER}\""
+                    echo "validationQuery = \"\$env{AGENTIDENTITY_DATABASE_VALIDATION_QUERY}\""
                     echo ""
                     
                     # Skip the original AgentIdentity section
