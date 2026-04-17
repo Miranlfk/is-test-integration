@@ -205,7 +205,7 @@ then
 fi
 
 
-wget -q "https://raw.githubusercontent.com/Miranlfk/testgrid-jenkins-library/refs/heads/add-script/scripts/is/intg/infra.json"
+wget -q "https://raw.githubusercontent.com/Miranlfk/is-test-integration/refs/heads/master/infra.json"
 log_info "Exporting JDK"
 set_jdk ${JDK_TYPE}
 
@@ -234,7 +234,7 @@ ls $TESTGRID_DIR
 
 # Update deployment.toml in the pack with $env{} placeholders for database configuration
 log_info "Updating deployment.toml with environment variable placeholders"
-wget -q https://integration-testgrid-resources.s3.us-east-1.amazonaws.com/iam-support-scripts/update_db_configs.sh
+wget -q https://raw.githubusercontent.com/Miranlfk/is-test-integration/refs/heads/master/update_db_configs.sh
 cp update_db_configs.sh $TESTGRID_DIR/
 bash $TESTGRID_DIR/update_db_configs.sh $DB_TYPE $PRODUCT_NAME-$PRODUCT_VERSION
 
