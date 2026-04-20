@@ -85,7 +85,7 @@ function install_jdks(){
 function set_jdk(){
     jdk_name=$1
     #When running Integration tests for JDK 17 or 21, JDK 11 is also required for compilation.
-    if [[ "$jdk_name" == "ADOPT_OPEN_JDK17" ]] || [[ "$jdk_name" == "ADOPT_OPEN_JDK21" ]] || [[ "$jdk_name" == "ADOPT_OPEN_JDK17_ARM" ]] || [[ "$jdk_name" == "ADOPT_OPEN_JDK21_ARM" ]]; then
+    if [[ "$jdk_name" == "ADOPT_OPEN_JDK17" ]] || [[ "$jdk_name" == "ADOPT_OPEN_JDK21" ]] || [[ "$jdk_name" == "ADOPT_OPEN_JDK25" ]] || [[ "$jdk_name" == "ADOPT_OPEN_JDK17_ARM" ]] || [[ "$jdk_name" == "ADOPT_OPEN_JDK21_ARM" ]] || [[ "$jdk_name" == "ADOPT_OPEN_JDK25_ARM" ]]; then
         echo "Installing " + $jdk_name
         install_jdks
         echo $JAVA_HOME
