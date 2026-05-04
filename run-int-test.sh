@@ -250,7 +250,7 @@ if [[ "$PRODUCT_VERSION" != *"SNAPSHOT"* ]]; then
     cd $TESTGRID_DIR/$PRODUCT_REPOSITORY_NAME || log_error "Failed to navigate to product repository directory"
     echo $JAVA_HOME
     #If support add the nexus repository to the pom.xml
-    if [[ "$PRODUCT_REPOSITORY_BRANCH" == *"support"* ]] ; then
+    if [[ "$PRODUCT_REPOSITORY_BRANCH" == *"support"* ]] || [[ "$PRODUCT_REPOSITORY_BRANCH" == *"PostgresTG"* ]] ; then
         cp $TESTGRID_DIR/add-patch-repository.sh $TESTGRID_DIR/$PRODUCT_REPOSITORY_NAME
         log_info "Add WSO2 repository to pom.xml"
         cd $TESTGRID_DIR/$PRODUCT_REPOSITORY_NAME/
