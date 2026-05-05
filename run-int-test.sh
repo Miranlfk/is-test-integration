@@ -274,7 +274,7 @@ if [[ "$PRODUCT_VERSION" != *"SNAPSHOT"* ]]; then
     #For Tag-based execution we initially build the product pack and then run the integration tests
     cd $TESTGRID_DIR/$PRODUCT_REPOSITORY_NAME
     echo $JAVA_HOME
-    if [[ "$PRODUCT_VERSION" == *"7.3.0"* ]]; then
+    if [[ "$PRODUCT_VERSION" == *"7.3.0"* ]] || [[ "$PRODUCT_VERSION" == *"7.4.0"* ]]; then
         export JAVA_HOME=/opt/${jdk_name}
     fi
     mvn clean install -Dmaven.test.skip=true -U
