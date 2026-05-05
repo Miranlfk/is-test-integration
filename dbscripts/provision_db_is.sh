@@ -79,6 +79,12 @@ elif [[ $WSO2_PRODUCT_VERSION == *"7.2.1"* ]]; then
 elif [[ $WSO2_PRODUCT_VERSION == *"7.3.0"* ]]; then
     WSO2_PRODUCT_VERSION_SHORT=is730
     USE_CONSENT_DB=true
+elif [[ $WSO2_PRODUCT_VERSION == *"7.3.1"* ]]; then
+    WSO2_PRODUCT_VERSION_SHORT=is731
+    USE_CONSENT_DB=true
+elif [[ $WSO2_PRODUCT_VERSION == *"7.4.0"* ]]; then
+    WSO2_PRODUCT_VERSION_SHORT=is740
+    USE_CONSENT_DB=true
 fi
 
 #Run database scripts for given database engine and product version
