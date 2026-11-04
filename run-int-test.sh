@@ -219,7 +219,7 @@ sed -i "s|DB_USERNAME|${CF_DB_USERNAME}|g" ${INFRA_JSON}
 sed -i "s|DB_PASSWORD|${CF_DB_PASSWORD}|g" ${INFRA_JSON}
 sed -i "s|DB_NAME|${DB_NAME}|g" ${INFRA_JSON}
 
-update_test_pom_db_config "${DB_TYPE}"
+# update_test_pom_db_config "${DB_TYPE}"
 
 # mkdir -p $M2_REPO_DIR
 # export MAVEN_OPTS="-Dmaven.repo.local=$M2_REPO_DIR"
