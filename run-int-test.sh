@@ -236,7 +236,7 @@ ls $TESTGRID_DIR
 log_info "Updating deployment.toml with environment variable placeholders"
 wget -q https://raw.githubusercontent.com/Miranlfk/is-test-integration/refs/heads/master/update_db_configs.sh
 cp update_db_configs.sh $TESTGRID_DIR/
-bash $TESTGRID_DIR/update_db_configs.sh $DB_TYPE $PRODUCT_NAME-$PRODUCT_VERSION
+# bash $TESTGRID_DIR/update_db_configs.sh $DB_TYPE $PRODUCT_NAME-$PRODUCT_VERSION
 
 # Re-zip the pack after configuration updates
 log_info "Re-zipping product pack with updated configurations"
