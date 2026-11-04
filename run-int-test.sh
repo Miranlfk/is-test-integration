@@ -199,13 +199,21 @@ XML
 source /etc/environment
 
 log_info "Clone Product repository"
-if [ ! -d $PRODUCT_REPOSITORY_NAME ];
-then
-    git clone https://${GIT_USER}:${GIT_PASS}@$PRODUCT_REPOSITORY --branch $PRODUCT_REPOSITORY_BRANCH --single-branch
+command -v git >/dev/null 2>&1 || log_error "git is not installed"
+PRODUCT_REPO_DIR="$TESTGRID_DIR/$PRODUCT_REPOSITORY_NAME"
+# Decide on pom.xml, not the directory: a failed clone or an earlier run can leave an empty
+# directory behind (the mkdir -p of $PRODUCT_REPOSITORY_PACK_DIR below creates it).
+if [ ! -f "$PRODUCT_REPO_DIR/pom.xml" ]; then
+    rm -rf "$PRODUCT_REPO_DIR"
+    set +o xtrace   # keep GIT_PASS out of the log
+    git clone "https://${GIT_USER}:${GIT_PASS}@${PRODUCT_REPOSITORY}" --branch "$PRODUCT_REPOSITORY_BRANCH" --single-branch "$PRODUCT_REPO_DIR"
+    clone_status=$?
+    set -o xtrace
+    [ $clone_status -eq 0 ] || log_error "Failed to clone $PRODUCT_REPOSITORY (branch/tag: $PRODUCT_REPOSITORY_BRANCH)"
 fi
 
 
-wget -q "https://raw.githubusercontent.com/Miranlfk/is-test-integration/refs/heads/master/infra.json"
+wget -q -O "$INFRA_JSON" "https://raw.githubusercontent.com/Miranlfk/is-test-integration/refs/heads/master/infra.json"
 log_info "Exporting JDK"
 set_jdk ${JDK_TYPE}
 
@@ -217,7 +225,7 @@ wget -q https://integration-testgrid-resources.s3.amazonaws.com/lib/jdbc/${db_fi
 sed -i "s|DB_HOST|${CF_DB_HOST}|g" ${INFRA_JSON}
 sed -i "s|DB_USERNAME|${CF_DB_USERNAME}|g" ${INFRA_JSON}
 sed -i "s|DB_PASSWORD|${CF_DB_PASSWORD}|g" ${INFRA_JSON}
-sed -i "s|DB_NAME|${DB_NAME}|g" ${INFRA_JSON}
+sed -i "s|DB_NAME|${CF_DB_NAME}|g" ${INFRA_JSON}
 
 # update_test_pom_db_config "${DB_TYPE}"
 
@@ -234,8 +242,7 @@ ls $TESTGRID_DIR
 
 # Update deployment.toml in the pack with $env{} placeholders for database configuration
 log_info "Updating deployment.toml with environment variable placeholders"
-wget -q https://raw.githubusercontent.com/Miranlfk/is-test-integration/refs/heads/master/update_db_configs.sh
-cp update_db_configs.sh $TESTGRID_DIR/
+wget -q -O "$TESTGRID_DIR/update_db_configs.sh" https://raw.githubusercontent.com/Miranlfk/is-test-integration/refs/heads/master/update_db_configs.sh
 # bash $TESTGRID_DIR/update_db_configs.sh $DB_TYPE $PRODUCT_NAME-$PRODUCT_VERSION
 
 # Re-zip the pack after configuration updates
@@ -277,7 +284,7 @@ if [[ "$PRODUCT_VERSION" != *"SNAPSHOT"* ]]; then
     if [[ "$PRODUCT_VERSION" == *"7.3.0"* ]] || [[ "$PRODUCT_VERSION" == *"7.4.0"* ]]; then
         export JAVA_HOME=/opt/${jdk_name}
     fi
-    mvn clean install -Dmaven.test.skip=true -U
+    mvn clean install -Dmaven.test.skip=true -U || log_error "Product build failed"
     ls $PRODUCT_REPOSITORY_PACK_DIR
     echo "Copying pack to target"
     mv $TESTGRID_DIR/$PRODUCT_NAME-$PRODUCT_VERSION.zip $PRODUCT_REPOSITORY_PACK_DIR/$PRODUCT_NAME-$PRODUCT_VERSION.zip
