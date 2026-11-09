@@ -277,6 +277,9 @@ if [[ "$PRODUCT_VERSION" != *"SNAPSHOT"* ]]; then
             find . -name "*.toml" -type f -exec sh -c 'echo "=== $1 ===" && grep -A 6 "^\[user_store\]" "$1" && echo ""' sh {} \;
         fi
     fi
+    if [[ "$PRODUCT_VERSION" == *"7.3.0"* ]]; then
+        export JAVA_HOME=/opt/${jdk_name}
+    fi
     log_info "Running Maven clean install"
     #For Tag-based execution we initially build the product pack and then run the integration tests
     cd $TESTGRID_DIR/$PRODUCT_REPOSITORY_NAME
