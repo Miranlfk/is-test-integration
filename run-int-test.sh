@@ -286,8 +286,10 @@ if [[ "$PRODUCT_VERSION" != *"SNAPSHOT"* ]]; then
     echo $JAVA_HOME
     if [[ "$PRODUCT_VERSION" == *"7.3.0"* ]] || [[ "$PRODUCT_VERSION" == *"7.4.0"* ]]; then
         export JAVA_HOME=/opt/${jdk_name}
+          mvn clean install -Dmaven.test.skip=true -U -Dcarbon.identity.framework.version=7.10.156.48
+    else
+        mvn clean install -Dmaven.test.skip=true -U || log_error "Product build failed"
     fi
-    mvn clean install -Dmaven.test.skip=true -U || log_error "Product build failed"
     ls $PRODUCT_REPOSITORY_PACK_DIR
     echo "Copying pack to target"
     mv $TESTGRID_DIR/$PRODUCT_NAME-$PRODUCT_VERSION.zip $PRODUCT_REPOSITORY_PACK_DIR/$PRODUCT_NAME-$PRODUCT_VERSION.zip
